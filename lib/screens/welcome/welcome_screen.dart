@@ -33,7 +33,7 @@ class WelcomeScreen extends StatelessWidget {
               // 2. LOGO IMAGE
               Image.asset(
                 'assets/images/logo_fm.png',
-                width: 180, // Sesuaikan ukuran logomu di sini
+                width: 500, // Ukuran logo
               ),
 
               const SizedBox(height: 20),
