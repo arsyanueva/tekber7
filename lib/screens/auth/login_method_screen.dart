@@ -16,7 +16,7 @@ class LoginMethodScreen extends StatelessWidget {
               const SizedBox(height: 20),
               
               // Tempat Ilustrasi (Orang main bola)
-              // Nanti ganti Icon ini dengan Image.asset('assets/images/illustration.png')
+              // Nanti ganti bisa ganti Iconnya pake Image.asset('assets/images/illustration.png')
               Container(
                 height: 250,
                 width: double.infinity,
@@ -54,7 +54,7 @@ class LoginMethodScreen extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Nanti arahkan ke form login
+                    // Nanti diarahin ke form login
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.darkBackground,
@@ -69,7 +69,7 @@ class LoginMethodScreen extends StatelessWidget {
                 ),
               ),
               
-              // ... Kode tombol Google bisa ditambahkan disini nanti
+              // ... Kode tombol Google bisa tambahin disini nanti
               
               const SizedBox(height: 20),
             ],
