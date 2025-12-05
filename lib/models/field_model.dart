@@ -3,66 +3,54 @@ class FieldModel {
   final String ownerId;
   final String name;
   final String address;
-  final double latitude;
-  final double longitude;
-  final List<String> facilities; // Kita ubah text jadi List biar gampang di UI
   final int pricePerHour;
   final String openHour;
   final String closeHour;
-  final String? description;
-  final String? imageUrl;
+  final String facilities;
+  final String description;
+  final String imageUrl; 
+  final double latitude;
+  final double longitude;
+  final double rating;  
 
   FieldModel({
     required this.id,
     required this.ownerId,
     required this.name,
     required this.address,
-    required this.latitude,
-    required this.longitude,
-    required this.facilities,
     required this.pricePerHour,
     required this.openHour,
     required this.closeHour,
-    this.description,
-    this.imageUrl,
+    required this.facilities,
+    required this.description,
+    required this.imageUrl,
+    this.latitude = 0.0,
+    this.longitude = 0.0,
+    required this.rating, 
   });
 
   factory FieldModel.fromJson(Map<String, dynamic> json) {
-    // Logic buat misahin fasilitas (misal di DB: "Wifi,Parkir" -> jadi List ["Wifi", "Parkir"])
-    List<String> facilitiesList = [];
-    if (json['facilities'] != null && json['facilities'].toString().isNotEmpty) {
-      facilitiesList = json['facilities'].toString().split(',').map((e) => e.trim()).toList();
-    }
-
     return FieldModel(
-      id: json['id'] ?? '',
-      ownerId: json['owner_id'] ?? '',
-      name: json['name'] ?? '',
-      address: json['address'] ?? '',
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
-      facilities: facilitiesList,
-      pricePerHour: json['price_per_hour'] ?? 0,
-      openHour: json['open_hour'] ?? '08:00',
-      closeHour: json['close_hour'] ?? '22:00',
-      description: json['description'],
-      imageUrl: json['image_url'],
+      id: json['id']?.toString() ?? '',
+      ownerId: json['owner_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? 'Tanpa Nama',
+      address: json['address']?.toString() ?? 'Alamat tidak tersedia',
+      pricePerHour: int.tryParse(json['price_per_hour'].toString()) ?? 0,
+      openHour: json['open_hour']?.toString() ?? '08:00',
+      closeHour: json['close_hour']?.toString() ?? '22:00',
+      facilities: json['facilities']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      
+      // Jika gambar kosong/null, alternatif pakai gambar placeholder
+      imageUrl: (json['image_url'] != null && json['image_url'].toString().isNotEmpty)
+          ? json['image_url'].toString()
+          : 'https://via.placeholder.com/300', 
+      
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      
+      // Jika null, anggap 0.0
+      rating: double.tryParse(json['rating'].toString()) ?? 0.0,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'owner_id': ownerId,
-      'name': name,
-      'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
-      'facilities': facilities.join(','), // Ubah List balik jadi String koma
-      'price_per_hour': pricePerHour,
-      'open_hour': openHour,
-      'close_hour': closeHour,
-      'description': description,
-      'image_url': imageUrl,
-    };
   }
 }

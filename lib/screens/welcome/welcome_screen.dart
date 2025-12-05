@@ -10,8 +10,7 @@ class WelcomeScreen extends StatelessWidget {
     // GestureDetector: Agar seluruh layar bisa diklik
     return GestureDetector(
       onTap: () {
-        // Perintah pindah ke halaman Login Method
-        Navigator.pushNamed(context, AppRoutes.loginMethod);
+        Navigator.pushNamed(context, AppRoutes.loginMethod); //// Perintah pindah ke halaman Login Method
       },
       child: Scaffold(
         // Container pembungkus utama
@@ -19,26 +18,26 @@ class WelcomeScreen extends StatelessWidget {
           width: double.infinity,
           height: double.infinity,
           decoration: const BoxDecoration(
-            // 1. SETTING BACKGROUND IMAGE
+            // BACKGROUND IMAGE
             image: DecorationImage(
               image: AssetImage('assets/images/bg.png'),
-              fit: BoxFit.cover, // Gambar memenuhi layar
+              fit: BoxFit.cover, // Full screen
             ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(), // Pendorong ke tengah
+              const Spacer(), // Center
 
-              // 2. LOGO IMAGE
+              // Logo app
               Image.asset(
                 'assets/images/logo_fm.png',
-                width: 180, // Sesuaikan ukuran logomu di sini
+                width: 500,
               ),
 
               const SizedBox(height: 20),
 
-              // 3. SLOGAN TEXT
+              // SLOGAN TEXT
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 40),
                 child: Text(
@@ -47,12 +46,12 @@ class WelcomeScreen extends StatelessWidget {
                   style: TextStyle(
                     color: AppColors.primaryYellow,
                     fontSize: 16,
-                    fontWeight: FontWeight.w500, // Agak tebal sedikit
+                    fontWeight: FontWeight.w500, // tebel dikit lah ya
                   ),
                 ),
               ),
 
-              const Spacer(), // Pendorong bawah agar seimbang
+              const Spacer(), // agak button (bawah)
             ],
           ),
         ),
