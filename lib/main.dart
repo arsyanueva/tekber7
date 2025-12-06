@@ -7,6 +7,9 @@ import 'screens/welcome/welcome_screen.dart';
 import 'screens/auth/login_method_screen.dart';
 //import 'utils/app_colors.dart'; 
 
+import 'models/booking_model.dart';
+import 'screens/booking/booking_detail_screen.dart'; // Sesuaikan path-nya
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
