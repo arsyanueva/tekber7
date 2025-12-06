@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart'; // Biarkan ini (PENTING buat tanggal)
 import 'routes/app_routes.dart';
 import 'screens/welcome/welcome_screen.dart';
 import 'screens/auth/login_method_screen.dart';
 import 'screens/home/home_screen.dart';
-//import 'utils/app_colors.dart'; 
+// Import screen kamu sudah dihapus biar bersih
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // NYALAKAN INI (Hapus tanda //) supaya tanggal Indonesia gak error
+  await initializeDateFormatting('id_ID', null);
 
   // Inisialisasi Supabase
   await Supabase.initialize(
@@ -33,11 +37,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      // --- PENGATURAN NAVIGASI ---
-      // Aplikasi akan mulai dari laman mana yang diinginkan
-      initialRoute: AppRoutes.welcome,
+      // --- PENGATURAN NAVIGASI DIKEMBALIKAN ---
+      initialRoute: AppRoutes.welcome, // Kembali ke Welcome Screen
       
-      // Daftar page untuk dipanggil namanya
+      // Daftar page (Hapus rute test kamu)
       routes: {
         AppRoutes.welcome: (context) => const WelcomeScreen(),
         AppRoutes.loginMethod: (context) => const LoginMethodScreen(),
