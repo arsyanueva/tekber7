@@ -1,36 +1,44 @@
 import 'package:flutter/material.dart';
-
-// 1. IMPORT SCREEN TEMANMU (Yang sudah ada)
 import '../screens/welcome/welcome_screen.dart';
 import '../screens/auth/login_method_screen.dart';
 import '../screens/home/home_screen.dart';
-
-// 2. IMPORT SCREEN FITUR KAMU (BARU)
+// Pastikan file-file ini sudah ada di folder booking
 import '../screens/booking/cancel_booking_screen.dart';
 import '../screens/booking/reschedule_booking_screen.dart';
+// Pastikan file-file ini sudah ada di folder review
 import '../screens/review/reply_review_screen.dart';
+import '../screens/review/review_form_screen.dart';
 
 class AppRoutes {
-  // --- DAFTAR NAMA RUTE (STRING) ---
+  // Definisi nama route
   static const String welcome = '/';
   static const String loginMethod = '/login-method';
   static const String home = '/home';
-  
-  // Nama Rute Baru (Punya Kamu)
+  static const String addReview = '/add-review'; 
   static const String cancelBooking = '/cancel-booking';
   static const String rescheduleBooking = '/reschedule-booking';
   static const String replyReview = '/reply-review';
 
-  // --- DAFTAR MAP NAVIGASI ---
-  // Fungsi ini yang dipanggil oleh main.dart
+  // Map route ke Widget
   static Map<String, WidgetBuilder> getRoutes() {
     return {
-      // Rute Teman
       welcome: (context) => const WelcomeScreen(),
       loginMethod: (context) => const LoginMethodScreen(),
-      home: (context) => HomeScreen(),
+      home: (context) => const HomeScreen(),
+      
+      // Route khusus untuk Add Review dengan Arguments
+      addReview: (context) {
+        // 1. Ambil data args dan cast sebagai Map
+        final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
-      // Rute Kamu (Didaftarkan disini supaya resmi)
+        // 2. Pass data ke Constructor ReviewFormScreen
+        return ReviewFormScreen(
+          bookingId: args['bookingId'],
+          fieldId: args['fieldId'],
+          fieldName: args['fieldName'],
+        );
+      },
+
       cancelBooking: (context) => const CancelBookingScreen(),
       rescheduleBooking: (context) => const RescheduleBookingScreen(),
       replyReview: (context) => const ReplyReviewScreen(),

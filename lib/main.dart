@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/date_symbol_data_local.dart'; // Tetap ada buat tanggal
+import 'package:intl/date_symbol_data_local.dart'; // Biarkan ini (PENTING buat tanggal)
+import 'package:provider/provider.dart'; // TAMBAHAN: Import Provider
+
 import 'routes/app_routes.dart';
 
-// Import screen tidak perlu ditulis disini lagi karena sudah diurus oleh app_routes.dart
+// Import Providers
+import 'providers/review_provider.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
