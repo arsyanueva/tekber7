@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// Pastikan path import ini benar (sesuaikan dengan nama package Anda)
 import 'package:tekber7/models/field_model.dart';
 import 'package:tekber7/utils/app_colors.dart';
 import 'package:tekber7/widgets/field_card.dart';
-// 1. INI PENTING: Import halaman BookingHistoryScreen
-import 'package:tekber7/screens/booking/booking_history_screen.dart'; 
+// Import halaman BookingHistoryScreen
+import 'package:tekber7/screens/booking/booking_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,8 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // 2. Variabel untuk menentukan tab mana yang aktif (0, 1, 2, atau 3)
-  int _selectedIndex = 0; 
+  int _selectedIndex = 0;
   
   List<FieldModel> fields = [];
   bool isLoading = true;
@@ -44,17 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 3. DAFTAR HALAMAN TAB
-    // Urutan di sini harus SAMA PERSIS dengan urutan BottomNavigationBarItem di bawah
     final List<Widget> pages = [
-      // Index 0: Home (Beranda)
-      HomeContent(fields: fields, isLoading: isLoading), 
+      // Index 0: Home Content (Yang sudah diperbaiki)
+      HomeContent(fields: fields, isLoading: isLoading),
       
       // Index 1: Lapangan
       const Center(child: Text('Halaman Lapangan')),
       
-      // Index 2: Pemesanan -> INI YANG MEMANGGIL HISTORY
-      const BookingHistoryScreen(), 
+      // Index 2: Pemesanan (History)
+      const BookingHistoryScreen(),
       
       // Index 3: Profil
       const Center(child: Text('Halaman Profil')),
@@ -63,33 +59,30 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       
-      // 4. BODY MENGGUNAKAN LOGIKA INDEX
-      // Ini yang bikin layar berganti saat diklik tanpa perlu AppRoutes
       body: pages[_selectedIndex], 
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex, // Menandai ikon mana yang aktif
+        currentIndex: _selectedIndex,
         selectedItemColor: AppColors.darkBackground,
         unselectedItemColor: Colors.grey,
-        // 5. SAAT DIKLIK, UBAH NILAI _selectedIndex
         onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Beranda'), // Index 0
-          BottomNavigationBarItem(icon: Icon(Icons.sports_soccer), label: 'Lapangan'), // Index 1
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Pemesanan'), // Index 2 (Target)
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'), // Index 3
+          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Beranda'),
+          BottomNavigationBarItem(icon: Icon(Icons.sports_soccer), label: 'Lapangan'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Pemesanan'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );
   }
 }
 
-// --- WIDGET KONTEN BERANDA ---
+// --- WIDGET KONTEN BERANDA (SUDAH DIPERBAIKI) ---
 class HomeContent extends StatelessWidget {
   final List<FieldModel> fields;
   final bool isLoading;
@@ -102,42 +95,135 @@ class HomeContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           Container(
-             padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
-             decoration: const BoxDecoration(
-               color: AppColors.darkBackground,
-               borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-             ),
-             child: Column(
-               children: [
-                 const Row(children: [
-                   CircleAvatar(radius: 20, backgroundImage: NetworkImage('https://i.pravatar.cc/100')),
-                   SizedBox(width: 12),
-                   Text('Halo, Daniel', style: TextStyle(color: Colors.white, fontSize: 16)),
-                   Spacer(),
-                   Icon(Icons.notifications_outlined, color: Colors.white),
-                 ]),
-                 const SizedBox(height: 24),
-                 const Text('Mau sewa lapangan\ndimana ?', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-               ],
-             ),
-           ),
-           const SizedBox(height: 20),
-           SizedBox(
-             height: 240,
-             child: isLoading
-                 ? const Center(child: CircularProgressIndicator())
-                 : fields.isEmpty
-                     ? const Center(child: Text('Belum ada data'))
-                     : ListView.builder(
-                         scrollDirection: Axis.horizontal,
-                         padding: const EdgeInsets.only(left: 24),
-                         itemCount: fields.length,
-                         itemBuilder: (context, index) => FieldCard(field: fields[index]),
-                       ),
-           ),
-           const SizedBox(height: 50),
+          // 1. HEADER HITAM (Termasuk Search Bar)
+          Container(
+            padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
+            decoration: const BoxDecoration(
+              color: AppColors.darkBackground,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Avatar & Nama
+                const Row(children: [
+                  CircleAvatar(radius: 20, backgroundImage: NetworkImage('https://i.pravatar.cc/100')),
+                  SizedBox(width: 12),
+                  Text('Halo, Daniel', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
+                  Spacer(),
+                  Icon(Icons.notifications_outlined, color: Colors.white),
+                ]),
+                
+                const SizedBox(height: 24),
+                
+                // Judul Besar
+                const Text('Mau sewa lapangan\ndimana ?', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                
+                const SizedBox(height: 24),
+
+                // BAGIAN PENCARIAN & KOTA (Ini yang hilang sebelumnya)
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Cari Lapangan di Surabaya',
+                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                          prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                          filled: true,
+                          fillColor: const Color(0xFF2B2930), // Abu Gelap
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Dropdown Kota
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2B2930),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        children: [
+                          Text('SBY', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 4),
+                          Icon(Icons.arrow_drop_down, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // 2. FILTER CHIPS (Terdekat, Termurah - Ini juga hilang sebelumnya)
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Row(
+              children: [
+                _buildFilterChip('Terdekat', false),
+                _buildFilterChip('Termurah', true), // Ceritanya aktif
+                _buildFilterChip('Fasilitas Lengkap', false),
+              ],
+            ),
+          ),
+
+          // 3. JUDUL REKOMENDASI (Ini juga hilang sebelumnya)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Rekomendasi untuk kamu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('Lihat Semua >', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+
+          // 4. LIST LAPANGAN
+          SizedBox(
+            height: 240,
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : fields.isEmpty
+                    ? const Center(child: Text('Belum ada data lapangan'))
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.only(left: 24),
+                        itemCount: fields.length,
+                        itemBuilder: (context, index) => FieldCard(field: fields[index]),
+                      ),
+          ),
+          const SizedBox(height: 50),
         ],
+      ),
+    );
+  }
+
+  // Helper Widget untuk Filter Chip
+  Widget _buildFilterChip(String label, bool isActive) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isActive ? AppColors.darkBackground : Colors.grey[200],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isActive ? Colors.white : Colors.black,
+          fontSize: 12,
+        ),
       ),
     );
   }
