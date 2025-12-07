@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Biarkan ini (PENTING buat tanggal)
+import 'package:provider/provider.dart'; // TAMBAHAN: Import Provider
+
 import 'routes/app_routes.dart';
-import 'screens/welcome/welcome_screen.dart';
-import 'screens/auth/login_method_screen.dart';
-import 'screens/home/home_screen.dart';
-// Import screen kamu sudah dihapus biar bersih
+
+// Import Providers
+import 'providers/review_provider.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // NYALAKAN INI (Hapus tanda //) supaya tanggal Indonesia gak error
+  // Inisialisasi Format Tanggal Indonesia
   await initializeDateFormatting('id_ID', null);
 
   // Inisialisasi Supabase
@@ -37,15 +38,12 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      // --- PENGATURAN NAVIGASI DIKEMBALIKAN ---
-      initialRoute: AppRoutes.welcome, // Kembali ke Welcome Screen
+      // --- PENGATURAN NAVIGASI ---
+      // Mulai dari halaman Welcome (Punya teman)
+      initialRoute: AppRoutes.welcome,
       
-      // Daftar page (Hapus rute test kamu)
-      routes: {
-        AppRoutes.welcome: (context) => const WelcomeScreen(),
-        AppRoutes.loginMethod: (context) => const LoginMethodScreen(),
-        AppRoutes.home: (context) => HomeScreen(),
-      },
+      // Ambil daftar rute dari file app_routes.dart yang baru kita perbaiki
+      routes: AppRoutes.getRoutes(),
     );
   }
 }
