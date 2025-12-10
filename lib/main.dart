@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'routes/app_routes.dart';
-import 'screens/welcome/welcome_screen.dart';
-import 'screens/auth/login_method_screen.dart';
-import 'screens/home/home_screen.dart';
-//import 'utils/app_colors.dart'; 
+import 'package:intl/date_symbol_data_local.dart'; 
 
-// --- IMPORT UNTUK TESTING FITUR BARA ---
+import 'routes/app_routes.dart';
 import 'models/booking_model.dart';
-import 'screens/booking/booking_detail_screen.dart'; // Sesuaikan folder kalau beda
+import 'screens/booking/booking_summary_screen.dart'; // File Ke-2
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Format Tanggal Indonesia
+  await initializeDateFormatting('id_ID', null);
 
   // Inisialisasi Supabase
   await Supabase.initialize(
@@ -31,35 +31,31 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Field Master',
       
-      // Tema dasar aplikasi
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFFD700)),
         useMaterial3: true,
       ),
 
-      // --- PENGATURAN NAVIGASI ---
-      // Aplikasi akan mulai dari laman mana yang diinginkan
-      // Kita balikin ke normal (Welcome), biar temenmu gak bingung
+      // Mulai dari halaman Welcome (Punya teman)
       initialRoute: AppRoutes.welcome,
       
-      // Daftar page untuk dipanggil namanya
+      // --- TEKNIK PENGGABUNGAN RUTE (FUSION!) ---
       routes: {
-        AppRoutes.welcome: (context) => const WelcomeScreen(),
-        AppRoutes.loginMethod: (context) => const LoginMethodScreen(),
-        AppRoutes.home: (context) => HomeScreen(),
+        // 1. Ambil semua rute punya temen (Welcome, Login, Home, dll)
+        ...AppRoutes.getRoutes(),
 
-        // --- JALUR TIKUS (TESTING BARA) ---
-        // Cara akses: Ubah URL di browser jadi .../#/test-payment
-        '/test-payment': (context) => BookingDetailScreen(
-          booking: BookingModel(
-            id: 'test-booking-123',
-            fieldId: 'field-001',
-            renterId: 'renter-001',
-            bookingDate: DateTime.now(), // Tanggal hari ini
+        // 2. Tambahin rute "Jalur Tikus" punya Bara (buat testing Pembayaran)
+        '/test-payment': (context) => BookingSummaryScreen( // <--- PASTIKAN INI SUMMARY
+          fieldName: "Lapangan 2 (Futsal)",
+          draftBooking: BookingModel(
+            id: 'test-123',
+            fieldId: 'f1',
+            renterId: 'r1',
+            bookingDate: DateTime.now(),
             startTime: '18:00',
             endTime: '20:00',
             totalPrice: 250000,
-            status: 'pending', // Status pending biar tombol bayar muncul
+            status: 'draft',
           ),
         ),
       },

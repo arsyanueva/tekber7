@@ -1,37 +1,29 @@
 class ReviewModel {
-  final String id;
+  final String? id;
   final String bookingId;
   final String fieldId;
   final String renterId;
-  final int rating; // 1 - 5
+  final int rating;
   final String comment;
-  final String? ownerReply; // Jawaban pemilik (bisa null kalau belum dijawab)
-  final DateTime createdAt; // Penting buat nampilin "Ulasan 2 hari yang lalu"
+  final String? ownerReply;
+  final String? renterName;
+  final String? renterAvatarUrl;
+  final DateTime? createdAt;
 
   ReviewModel({
-    required this.id,
+    this.id,
     required this.bookingId,
     required this.fieldId,
     required this.renterId,
     required this.rating,
-    required this.comment,
+    required this.comment,    
     this.ownerReply,
-    required this.createdAt,
+    this.renterName,
+    this.renterAvatarUrl,
+    this.createdAt,
   });
 
-  factory ReviewModel.fromJson(Map<String, dynamic> json) {
-    return ReviewModel(
-      id: json['id'] ?? '',
-      bookingId: json['booking_id'] ?? '',
-      fieldId: json['field_id'] ?? '',
-      renterId: json['renter_id'] ?? '',
-      rating: json['rating'] ?? 0,
-      comment: json['comment'] ?? '',
-      ownerReply: json['owner_reply'], // Bisa null
-      createdAt: DateTime.parse(json['created_at']), // Supabase formatnya ISO8601
-    );
-  }
-
+  // Konversi data ke JSON untuk dikirim ke Supabase (Create Review)
   Map<String, dynamic> toJson() {
     return {
       'booking_id': bookingId,
@@ -39,8 +31,24 @@ class ReviewModel {
       'renter_id': renterId,
       'rating': rating,
       'comment': comment,
-      'owner_reply': ownerReply,
-      // 'created_at' biasanya otomatis diisi Supabase pas insert
     };
+  }
+
+  // Factory untuk mengubah JSON dari Supabase menjadi object (Read Review)
+  factory ReviewModel.fromJson(Map<String, dynamic> json) {
+    return ReviewModel(
+      id: json['id'],
+      bookingId: json['booking_id'] ?? '',
+      fieldId: json['field_id'] ?? '',
+      renterId: json['renter_id'] ?? '',
+      rating: json['rating'] ?? 0,
+      comment: json['comment'] ?? '',      
+      ownerReply: json['owner_reply'], 
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at']) 
+          : null,
+      renterName: json['users'] != null ? json['users']['name'] : 'User',
+      renterAvatarUrl: json['users'] != null ? json['users']['profile_picture'] : null,
+    );
   }
 }
