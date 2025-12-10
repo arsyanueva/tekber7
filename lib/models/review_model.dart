@@ -5,6 +5,9 @@ class ReviewModel {
   final String renterId;
   final int rating;
   final String comment;
+  final String? ownerReply;
+  final String? renterName;
+  final String? renterAvatarUrl;
   final DateTime? createdAt;
 
   ReviewModel({
@@ -13,11 +16,14 @@ class ReviewModel {
     required this.fieldId,
     required this.renterId,
     required this.rating,
-    required this.comment,
+    required this.comment,    
+    this.ownerReply,
+    this.renterName,
+    this.renterAvatarUrl,
     this.createdAt,
   });
 
-  // Konversi data ke JSON untuk dikirim ke Supabase
+  // Konversi data ke JSON untuk dikirim ke Supabase (Create Review)
   Map<String, dynamic> toJson() {
     return {
       'booking_id': bookingId,
@@ -25,20 +31,24 @@ class ReviewModel {
       'renter_id': renterId,
       'rating': rating,
       'comment': comment,
-      // created_at biasanya otomatis diurus oleh database (default now())
     };
   }
 
-  // Factory untuk mengubah JSON dari Supabase menjadi object (jika perlu read)
+  // Factory untuk mengubah JSON dari Supabase menjadi object (Read Review)
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
     return ReviewModel(
       id: json['id'],
-      bookingId: json['booking_id'],
-      fieldId: json['field_id'],
-      renterId: json['renter_id'],
-      rating: json['rating'],
-      comment: json['comment'],
-      createdAt: DateTime.parse(json['created_at']),
+      bookingId: json['booking_id'] ?? '',
+      fieldId: json['field_id'] ?? '',
+      renterId: json['renter_id'] ?? '',
+      rating: json['rating'] ?? 0,
+      comment: json['comment'] ?? '',      
+      ownerReply: json['owner_reply'], 
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at']) 
+          : null,
+      renterName: json['users'] != null ? json['users']['name'] : 'User',
+      renterAvatarUrl: json['users'] != null ? json['users']['profile_picture'] : null,
     );
   }
 }

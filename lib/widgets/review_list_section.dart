@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/review_provider.dart';
 import '../models/review_model.dart';
-import 'star_rating_display.dart';
 
 class ReviewListSection extends StatefulWidget {
   final String fieldId;
@@ -42,7 +41,7 @@ class _ReviewListSectionState extends State<ReviewListSection> {
           ElevatedButton(
             onPressed: () {
               Provider.of<ReviewProvider>(context, listen: false)
-                  .replyReview(review.id, replyController.text, widget.fieldId);
+                  .replyReview(review.id ?? "", replyController.text, widget.fieldId);
               Navigator.pop(context);
             },
             child: const Text("Kirim"),
