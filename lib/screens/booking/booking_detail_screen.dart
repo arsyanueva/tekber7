@@ -240,18 +240,34 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 
                 // 4. TOMBOL KONFIRMASI (Sticky di Bawah)
                 Container(
-                  padding: const EdgeInsets.all(20),
-                  color: Colors.white,
+                  // --- PERUBAHAN DI SINI ---
+                  // Kita kasih padding bawah 50 (sebelumnya 20) biar tombolnya naik jauh ke atas
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 60), 
+                  
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    // Opsional: Kasih bayangan dikit biar keliatan misah sama konten atasnya
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
                   child: SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryBlack,
+                        backgroundColor: const Color(0xFF1E1E1E), // primaryBlack
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: _handlePayment,
-                      child: const Text('Konfirmasi Pembayaran', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Konfirmasi Pembayaran', 
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                      ),
                     ),
                   ),
                 ),

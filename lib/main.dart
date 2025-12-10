@@ -6,8 +6,9 @@ import 'screens/auth/login_method_screen.dart';
 import 'screens/home/home_screen.dart';
 //import 'utils/app_colors.dart'; 
 
+// --- IMPORT UNTUK TESTING FITUR BARA ---
 import 'models/booking_model.dart';
-import 'screens/booking/booking_detail_screen.dart'; // Sesuaikan path-nya
+import 'screens/booking/booking_detail_screen.dart'; // Sesuaikan folder kalau beda
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
 
       // --- PENGATURAN NAVIGASI ---
       // Aplikasi akan mulai dari laman mana yang diinginkan
+      // Kita balikin ke normal (Welcome), biar temenmu gak bingung
       initialRoute: AppRoutes.welcome,
       
       // Daftar page untuk dipanggil namanya
@@ -45,6 +47,21 @@ class MyApp extends StatelessWidget {
         AppRoutes.welcome: (context) => const WelcomeScreen(),
         AppRoutes.loginMethod: (context) => const LoginMethodScreen(),
         AppRoutes.home: (context) => HomeScreen(),
+
+        // --- JALUR TIKUS (TESTING BARA) ---
+        // Cara akses: Ubah URL di browser jadi .../#/test-payment
+        '/test-payment': (context) => BookingDetailScreen(
+          booking: BookingModel(
+            id: 'test-booking-123',
+            fieldId: 'field-001',
+            renterId: 'renter-001',
+            bookingDate: DateTime.now(), // Tanggal hari ini
+            startTime: '18:00',
+            endTime: '20:00',
+            totalPrice: 250000,
+            status: 'pending', // Status pending biar tombol bayar muncul
+          ),
+        ),
       },
     );
   }
