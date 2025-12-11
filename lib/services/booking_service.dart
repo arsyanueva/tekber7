@@ -117,22 +117,27 @@ class BookingService {
   // ==========================================
 
   // [BARU - REQUEST KAMU] Simulasi Bayar Tanpa Upload (Sat Set)
-  Future<void> confirmPaymentMock(String bookingId) async {
-    // --- [JALUR TIKUS ON] ---
-    // Kalau ID-nya dummy (mengandung kata 'test'), kita pura-pura sukses aja.
-    // Ini biar Supabase gak marah gara-gara ID kita palsu.
+  // [UPDATE] Sekarang nerima parameter 'paymentMethod'
+  Future<void> confirmPaymentMock(String bookingId, String paymentMethod) async {
+    // --- JALUR TIKUS (Tetap amanin buat testing) ---
     if (bookingId.contains('test')) {
-      print("Mode Testing: Skip database, langsung sukses! 🚀");
-      return; // Anggap selesai, gak usah kontak database
+      print("Mode Testing: Bayar pake $paymentMethod sukses! 🚀");
+      return; 
     }
-    // ------------------------
 
     try {
+      // Mapping nama UI ke nama Database (biar rapi)
+      // Misal: "Transfer BCA" -> "bca", "E-Wallet Dana" -> "dana"
+      String dbMethod = 'transfer'; // Default
+      if (paymentMethod.contains('BCA')) dbMethod = 'transfer_bca';
+      if (paymentMethod.contains('Dana')) dbMethod = 'ewallet_dana';
+      if (paymentMethod.contains('QRIS')) dbMethod = 'qris';
+
       await _supabase.from('bookings').update({
         'status': 'confirmed', 
         'payment_proof': 'confirmed_by_system_mock', 
-        'payment_method': 'transfer_bca', 
-        // 'updated_at' udah dihapus kan tadi?
+        'payment_method': dbMethod, // <--- INI YANG PENTING
+        // 'updated_at': DateTime.now().toIso8601String(), // Inget ini dihapus kalo DB gada kolomnya
       }).eq('id', bookingId);
     } catch (e) {
       print("Error Mock Payment: $e");
