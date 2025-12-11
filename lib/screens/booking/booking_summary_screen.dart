@@ -137,7 +137,11 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BookingDetailScreen(booking: widget.draftBooking),
+                          builder: (context) => BookingDetailScreen(
+                            booking: widget.draftBooking,
+                            // KIRIM PILIHAN USER KE SEBELAH 👉
+                            selectedMethod: _selectedPaymentMethod, 
+                          ),
                         ),
                       );
                     },
@@ -189,25 +193,144 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
+  // --- LOGIC PILIH PEMBAYARAN (MODEL DROPDOWN/EXPANSION) ---
   void _showPaymentSelector() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+      isScrollControlled: true, // Biar bisa full screen kalo perlu
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet( // Biar bisa ditarik ke atas
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle Bar Kecil
+                  Center(
+                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text("Pilih Metode Pembayaran", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  const SizedBox(height: 10),
+                  
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      children: [
+                        // KELOMPOK 1: TRANSFER BANK
+                        _buildGroup(
+                          title: "Transfer Bank",
+                          icon: Icons.account_balance,
+                          children: [
+                            _buildPaymentOption("Transfer BCA", "assets/images/bca.png"),
+                            _buildPaymentOption("Transfer BRI", "assets/images/bri.png"),
+                            _buildPaymentOption("Transfer Mandiri", "assets/images/mandiri.png"),
+                            _buildPaymentOption("Bank Jatim", "assets/images/bank_jatim.png"),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // KELOMPOK 2: E-WALLET
+                        _buildGroup(
+                          title: "E-Wallet",
+                          icon: Icons.wallet,
+                          children: [
+                            _buildPaymentOption("E-Wallet Dana", "assets/images/dana.png"),
+                            _buildPaymentOption("E-Wallet Gopay", "assets/images/gopay.png"),
+                            _buildPaymentOption("E-Wallet OVO", "assets/images/ovo.png"),
+                            _buildPaymentOption("ShopeePay", "assets/images/shopeepay.png"),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // KELOMPOK 3: QRIS
+                        _buildGroup(
+                          title: "QRIS",
+                          icon: Icons.qr_code_scanner,
+                          children: [
+                            _buildPaymentOption("QRIS", "assets/images/qris.png"),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        );
+      }
+    );
+  }
+
+  // Widget Helper buat Group (Dropdown)
+  Widget _buildGroup({required String title, required IconData icon, required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Theme(
+        // Ilangin garis border bawaan ExpansionTile
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Icon(icon, color: Colors.black),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          // Defaultnya kebuka kalau metode yang dipilih ada di dalam grup ini (Opsional logic)
+          initiallyExpanded: false, 
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  // Widget Helper buat Item Pembayaran (Mirip yang kemarin, dirapiin dikit)
+  Widget _buildPaymentOption(String name, String imagePath) {
+    bool isSelected = _selectedPaymentMethod == name;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedPaymentMethod = name);
+        Navigator.pop(context); // Tutup popup
+      },
+      child: Container(
+        margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFD700).withOpacity(0.1) : Colors.grey[50],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFFFD700) : Colors.transparent,
+          ),
+        ),
+        child: Row(
           children: [
-            const Text("Metode Pembayaran", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            ListTile(
-              leading: const Icon(Icons.account_balance, color: Colors.blue),
-              title: const Text("Transfer BCA"),
-              onTap: () { setState(() => _selectedPaymentMethod = "Transfer BCA"); Navigator.pop(context); },
+            // Logo
+            Container(
+              width: 40, height: 30,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+              child: Image.asset(imagePath, fit: BoxFit.contain, 
+                errorBuilder: (c,o,s) => const Icon(Icons.image, size: 20, color: Colors.grey)
+              ),
             ),
-             ListTile(
-              leading: const Icon(Icons.wallet, color: Colors.blue),
-              title: const Text("E-Wallet Dana"),
-              onTap: () { setState(() => _selectedPaymentMethod = "Dana"); Navigator.pop(context); },
-            ),
+            const SizedBox(width: 12),
+            // Nama
+            Expanded(child: Text(name, style: const TextStyle(fontWeight: FontWeight.w500))),
+            // Radio
+            if (isSelected) 
+              const Icon(Icons.check_circle, color: Color(0xFFFFD700), size: 20),
           ],
         ),
       ),
