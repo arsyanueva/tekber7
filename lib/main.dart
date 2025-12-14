@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/date_symbol_data_local.dart'; // Biarkan ini (PENTING buat tanggal)
-import 'package:provider/provider.dart'; // TAMBAHAN: Import Provider
+import 'package:intl/date_symbol_data_local.dart'; 
 
 import 'routes/app_routes.dart';
+import 'models/booking_model.dart';
+import 'screens/booking/booking_summary_screen.dart'; // File Ke-2
 
-// Import Providers
-import 'providers/review_provider.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,18 +31,34 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Field Master',
       
-      // Tema dasar aplikasi
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFFD700)),
         useMaterial3: true,
       ),
 
-      // --- PENGATURAN NAVIGASI ---
       // Mulai dari halaman Welcome (Punya teman)
       initialRoute: AppRoutes.welcome,
       
-      // Ambil daftar rute dari file app_routes.dart yang baru kita perbaiki
-      routes: AppRoutes.getRoutes(),
+      // --- TEKNIK PENGGABUNGAN RUTE (FUSION!) ---
+      routes: {
+        // 1. Ambil semua rute punya temen (Welcome, Login, Home, dll)
+        ...AppRoutes.getRoutes(),
+
+        // 2. Tambahin rute "Jalur Tikus" punya Bara (buat testing Pembayaran)
+        '/test-payment': (context) => BookingSummaryScreen( // <--- PASTIKAN INI SUMMARY
+          fieldName: "Lapangan 2 (Futsal)",
+          draftBooking: BookingModel(
+            id: 'test-123',
+            fieldId: 'f1',
+            renterId: 'r1',
+            bookingDate: DateTime.now(),
+            startTime: '18:00',
+            endTime: '20:00',
+            totalPrice: 250000,
+            status: 'draft',
+          ),
+        ),
+      },
     );
   }
 }

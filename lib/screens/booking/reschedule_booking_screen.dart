@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
 import '../../services/booking_service.dart'; 
 import 'confirm_reschedule_screen.dart'; 
 
@@ -270,6 +269,7 @@ class _RescheduleBookingScreenState extends State<RescheduleBookingScreen> {
                 MaterialPageRoute(
                   builder: (context) => ConfirmRescheduleScreen(
                     bookingId: _realBookingId!, // ID ASLI DIKIRIM KE SINI
+                    fieldId: _bookingData!['field_id'], // ID Lapangan
                     newDate: _selectedDate!,
                     reason: _reasonController.text,
                   ),

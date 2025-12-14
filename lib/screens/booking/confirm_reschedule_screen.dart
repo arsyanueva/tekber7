@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Pastikan package ini sudah diinstall (Langkah 1)
 import '../../services/booking_service.dart'; // Import Service
-import 'reschedule_success_screen.dart';
+import 'reschedule_success_screen.dart'; // Lanjut ke halaman sukses
 
 class ConfirmRescheduleScreen extends StatefulWidget {
   final String bookingId; // MENERIMA ID
+  final String fieldId;
   final DateTime newDate;
   final String reason;
 
   const ConfirmRescheduleScreen({
     super.key, 
     required this.bookingId, // WAJIB DIISI
+    required this.fieldId,
     required this.newDate, 
     required this.reason
   });
@@ -22,6 +24,9 @@ class ConfirmRescheduleScreen extends StatefulWidget {
 class _ConfirmRescheduleScreenState extends State<ConfirmRescheduleScreen> {
   bool _isLoading = false;
   final BookingService _bookingService = BookingService(); // Panggil Service
+  DateTime _selectedDate = DateTime.now().add(const Duration(days: 1)); 
+  String _selectedStartTime = "08:00"; 
+  String _selectedEndTime = "09:00";
 
   // Helper format tanggal (Sekarang pakai intl biar rapi)
   String _formatDate(DateTime date) {
@@ -154,8 +159,11 @@ class _ConfirmRescheduleScreenState extends State<ConfirmRescheduleScreen> {
             
             // 1. PANGGIL SERVICE UNTUK UPDATE KE DATABASE
             bool success = await _bookingService.rescheduleBooking(
-              widget.bookingId, 
-              widget.newDate
+              bookingId: widget.bookingId,       // ID Booking
+              fieldId: widget.fieldId,           // ID Lapangan (Pastiin variabelnya ada di widget ini)
+              newDate: _selectedDate,             // Tanggal Baru yang dipilih
+              newStartTime: _selectedStartTime,   // Jam Mulai Baru (Format "HH:mm", misal "18:00")
+              newEndTime: _selectedEndTime,       // Jam Selesai Baru (Format "HH:mm", misal "19:00")
             );
             
             if (mounted) {
