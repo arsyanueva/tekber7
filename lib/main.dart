@@ -5,7 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'routes/app_routes.dart';
 import 'models/booking_model.dart';
 import 'screens/booking/booking_summary_screen.dart'; // File Ke-2
-
+import 'screens/temp_loading_screen.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,13 +36,15 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      // Mulai dari halaman Welcome (Punya teman)
-      initialRoute: AppRoutes.welcome,
+      initialRoute: '/temp-login',
       
       // --- TEKNIK PENGGABUNGAN RUTE (FUSION!) ---
       routes: {
         // 1. Ambil semua rute punya temen (Welcome, Login, Home, dll)
         ...AppRoutes.getRoutes(),
+
+        // Daftarkan TempLoadingScreen di sini sebagai route tambahan
+        '/temp-login': (context) => const TempLoadingScreen(),
 
         // 2. Tambahin rute "Jalur Tikus" punya Bara (buat testing Pembayaran)
         '/test-payment': (context) => BookingSummaryScreen( // <--- PASTIKAN INI SUMMARY
