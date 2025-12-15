@@ -5,6 +5,7 @@ import 'package:tekber7/utils/app_colors.dart';
 import 'package:tekber7/widgets/field_card.dart';
 // Import halaman BookingHistoryScreen
 import 'package:tekber7/screens/booking/booking_history_screen.dart';
+import 'field_detail_screen.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -191,7 +192,7 @@ class HomeContent extends StatelessWidget {
 
           // 4. LIST LAPANGAN
           SizedBox(
-            height: 240,
+            height: 260,
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : fields.isEmpty
@@ -200,7 +201,30 @@ class HomeContent extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.only(left: 24),
                         itemCount: fields.length,
-                        itemBuilder: (context, index) => FieldCard(field: fields[index]),
+                        itemBuilder: (context, index) {
+                          final field = fields[index];
+
+                          // --- PERUBAHAN DI SINI ---
+                          // Kita bungkus FieldCard dengan GestureDetector agar bisa diklik
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigasi ke halaman Detail membawa fieldId
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FieldDetailScreen(
+                                    // Pastikan field.id sesuai dengan properti di model Anda
+                                    // Menggunakan '!' jika Anda yakin id tidak null, 
+                                    // atau beri default value kosong jika ragu.
+                                    fieldId: field.id ?? '', 
+                                  ),
+                                ),
+                              );
+                            },
+                            child: FieldCard(field: field),
+                          );
+                          // -------------------------
+                        },
                       ),
           ),
           const SizedBox(height: 50),
