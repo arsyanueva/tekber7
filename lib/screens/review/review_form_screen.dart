@@ -3,10 +3,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tekber7/models/review_model.dart';
 import 'package:tekber7/services/review_service.dart';
 import 'package:tekber7/utils/app_colors.dart';
+
 class ReviewFormScreen extends StatefulWidget {
   final String bookingId;
   final String fieldId;
-  final String fieldName; // Untuk ditampilkan di header
+  final String fieldName;
 
   const ReviewFormScreen({
     super.key,
@@ -20,10 +21,84 @@ class ReviewFormScreen extends StatefulWidget {
 }
 
 class _ReviewFormScreenState extends State<ReviewFormScreen> {
+  // State Form Input
   int _selectedRating = 0;
   final TextEditingController _commentController = TextEditingController();
   final ReviewService _reviewService = ReviewService();
   bool _isLoading = false;
+
+  // State Data User (Penyewa)
+  String _userName = 'Memuat...'; 
+  String? _userPhotoUrl;
+
+  // State Data Rating Lapangan (Average)
+  double _averageRating = 0.0;
+  int _reviewCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();   
+    _fetchFieldRating(); 
+  }
+
+  // 1. Fungsi Ambil Data User (
+  Future<void> _fetchUserData() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      if (user != null) {
+        final data = await supabase
+            .from('users')
+            .select('name, profile_picture')
+            .eq('id', user.id)
+            .single();
+
+        if (mounted) {
+          setState(() {
+            _userName = data['name'] ?? user.email ?? 'Pengguna';
+            _userPhotoUrl = data['profile_picture'];
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching user data: $e');
+    }
+  }
+
+  // 2. Fungsi Hitung Rating Rata-rata dari Database
+  Future<void> _fetchFieldRating() async {
+    try {
+      final supabase = Supabase.instance.client;
+
+      // Validasi ID
+      if (widget.fieldId.isEmpty) return;
+
+      final response = await supabase
+          .from('reviews')
+          .select('rating')
+          .eq('field_id', widget.fieldId);
+
+      final data = response as List<dynamic>;
+
+      if (data.isNotEmpty) {
+        // Hitung total & rata-rata
+        final int totalStars = data.fold(0, (sum, item) => sum + (item['rating'] as int));
+        final double avg = totalStars / data.length;
+
+        if (mounted) {
+          setState(() {
+            _reviewCount = data.length;
+            _averageRating = double.parse(avg.toStringAsFixed(1));
+          });
+        }
+      }
+    } catch (e) {
+      //  debugPrint untuk error log 
+      debugPrint('Error fetching rating: $e');
+    }
+  }
 
   void _submitReview() async {
     if (_selectedRating == 0) {
@@ -53,7 +128,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Review berhasil dikirim!')),
         );
-        Navigator.pop(context); // Kembali ke halaman sebelumnya
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
@@ -83,7 +158,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Nama Lapangan & Badge Diskon (Visual dummy sesuai gambar)
+            // Header Nama Lapangan & Jarak
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -100,7 +175,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFC700), // Kuning
+                    color: const Color(0xFFFFC700),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
@@ -112,13 +187,21 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
             ),
             const SizedBox(height: 8),
             
-            // Rating Lapangan (Static info)
+            // --- BAGIAN RATING DINAMIS ---
             Row(
               children: [
                 const Icon(Icons.star, color: Colors.amber, size: 16),
                 const SizedBox(width: 4),
-                const Text('4.8 (40)', style: TextStyle(fontWeight: FontWeight.bold)),
+                // Tampilkan Rating Hasil Hitungan
+                Text(
+                  _reviewCount > 0 
+                      ? '$_averageRating ($_reviewCount)' // Contoh: 4.5 (12)
+                      : 'Belum ada rating',               // Jika kosong
+                  style: const TextStyle(fontWeight: FontWeight.bold)
+                ),
                 const SizedBox(width: 12),
+                
+                // Badge Diskon (Masih Statis/Hardcode tidak apa2)
                 const Icon(Icons.verified, color: Colors.orange, size: 16),
                 const SizedBox(width: 4),
                 const Text('10% Discount area', style: TextStyle(fontSize: 12)),
@@ -126,17 +209,19 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
             ),
             const SizedBox(height: 24),
 
-            // User Info
-            const Row(
+            // --- USER INFO ---
+            Row(
               children: [
                  CircleAvatar(
-                   backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
+                   backgroundImage: _userPhotoUrl != null 
+                      ? NetworkImage(_userPhotoUrl!) 
+                      : const NetworkImage('https://i.pravatar.cc/100'),
                    radius: 16,
                  ),
-                 SizedBox(width: 12),
+                 const SizedBox(width: 12),
                  Text(
-                   'Daniel',
-                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                   _userName, 
+                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                  ),
               ],
             ),
