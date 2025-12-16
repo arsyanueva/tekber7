@@ -3,8 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart'; 
 
 import 'routes/app_routes.dart';
-import 'models/booking_model.dart';
-import 'screens/booking/booking_summary_screen.dart'; // File Ke-2
 import 'screens/temp_loading_screen.dart'; 
 
 Future<void> main() async {
@@ -45,21 +43,6 @@ class MyApp extends StatelessWidget {
 
         // Daftarkan TempLoadingScreen di sini sebagai route tambahan
         '/temp-login': (context) => const TempLoadingScreen(),
-
-        // 2. Tambahin rute "Jalur Tikus" punya Bara (buat testing Pembayaran)
-        '/test-payment': (context) => BookingSummaryScreen( // <--- PASTIKAN INI SUMMARY
-          fieldName: "Lapangan 2 (Futsal)",
-          draftBooking: BookingModel(
-            id: 'test-123',
-            fieldId: 'f1',
-            renterId: 'r1',
-            bookingDate: DateTime.now(),
-            startTime: '18:00',
-            endTime: '20:00',
-            totalPrice: 250000,
-            status: 'draft',
-          ),
-        ),
       },
     );
   }

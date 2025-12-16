@@ -3,6 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/utils/app_colors.dart';
 
+import 'package:tekber7/screens/booking/booking_summary_screen.dart'; 
+import 'package:tekber7/widgets/review_list_section.dart'; 
+
 class FieldDetailScreen extends StatefulWidget {
   final String fieldId;
 
@@ -20,12 +23,19 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
   List<String> facilitiesList = [];
 
   // Data Review
-  List<Map<String, dynamic>> reviewsList = [];
   double averageRating = 0.0;
   int reviewCount = 0;
 
   // Tab Controller
   late TabController _tabController;
+
+  // DATA JAM OPERASIONAL
+  final List<String> timeSlots = [
+    "08.00 - 09.00", "09.00 - 10.00", "10.00 - 11.00",
+    "11.00 - 12.00", "13.00 - 14.00", "14.00 - 15.00",
+    "15.00 - 16.00", "16.00 - 17.00", "17.00 - 18.00",
+    "18.00 - 19.00", "19.00 - 20.00", "20.00 - 21.00"
+  ];
 
   @override
   void initState() {
@@ -44,30 +54,24 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
     try {
       final supabase = Supabase.instance.client;
 
-      // 1. Ambil Detail Lapangan
       final fieldResponse = await supabase
           .from('fields')
           .select()
           .eq('id', widget.fieldId)
           .single();
 
-      // 2. Ambil Review + Data User (Join)
       final reviewsResponse = await supabase
           .from('reviews')
-          .select('*, users(name, profile_picture)')
-          .eq('field_id', widget.fieldId)
-          .order('created_at', ascending: false);
+          .select('rating')
+          .eq('field_id', widget.fieldId);
 
-      // --- OLAH DATA ---
       final fData = fieldResponse;
       
-      // Parse fasilitas (pisahkan dengan koma)
       final String rawFacilities = fData['facilities'] ?? '';
       final List<String> fList = rawFacilities.isNotEmpty 
           ? rawFacilities.split(',').map((e) => e.trim()).toList() 
           : [];
 
-      // Hitung Rating
       final rList = List<Map<String, dynamic>>.from(reviewsResponse);
       double totalRating = 0;
       if (rList.isNotEmpty) {
@@ -76,13 +80,12 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
         }
         averageRating = totalRating / rList.length;
       }
+      reviewCount = rList.length;
 
       if (mounted) {
         setState(() {
           fieldData = fData;
           facilitiesList = fList;
-          reviewsList = rList;
-          reviewCount = rList.length;
           isLoading = false;
         });
       }
@@ -92,21 +95,221 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
     }
   }
 
-  // Helper format rupiah
   String formatCurrency(num price) {
-    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp. ', decimalDigits: 0).format(price);
+    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(price);
+  }
+
+  // --- [UPDATE] LOGIC PILIH TANGGAL & JAM ---
+  void _showBookingModal() {
+    // Default tanggal hari ini
+    DateTime tempSelectedDate = DateTime.now();
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true, // Biar modal bisa tinggi
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        Set<String> selectedSlots = {}; 
+        
+        return StatefulBuilder( 
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              height: 550, // Tinggiin dikit biar muat date picker
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // --- PILIH TANGGAL (BARU) ---
+                  const Text("Tanggal Bermain", style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      // Munculin Kalender Bawaan Android/iOS
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: tempSelectedDate,
+                        firstDate: DateTime.now(), // Gaboleh pilih tanggal lampau
+                        lastDate: DateTime.now().add(const Duration(days: 30)), // Maksimal 30 hari ke depan
+                      );
+                      if (picked != null && picked != tempSelectedDate) {
+                        setModalState(() {
+                          tempSelectedDate = picked;
+                          selectedSlots.clear(); // Reset jam kalo ganti tanggal (biar ga error)
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(tempSelectedDate),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const Icon(Icons.calendar_today, color: AppColors.darkBackground, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  
+                  const Text("Pilih Jam", style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  const SizedBox(height: 10),
+
+                  // GRID PILIHAN JAM (SAMA KAYAK SEBELUMNYA)
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, 
+                        childAspectRatio: 2.5, 
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: timeSlots.length,
+                      itemBuilder: (context, index) {
+                        final slot = timeSlots[index];
+                        final isSelected = selectedSlots.contains(slot);
+                        
+                        return GestureDetector(
+                          onTap: () {
+                            setModalState(() {
+                              if (isSelected) {
+                                selectedSlots.remove(slot);
+                              } else {
+                                selectedSlots.add(slot);
+                              }
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.darkBackground : Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSelected ? AppColors.darkBackground : Colors.grey.shade300
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              slot,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.black,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                fontSize: 12
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Info Total & Tombol
+                  if (selectedSlots.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("${selectedSlots.length} Jam dipilih"),
+                          Text(
+                            formatCurrency((fieldData!['price_per_hour'] as num) * selectedSlots.length),
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkBackground),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFC700),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        if (selectedSlots.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Pilih minimal 1 jam bos!")));
+                          return;
+                        }
+
+                        // --- VALIDASI URUTAN JAM (COPY PASTE YANG LAMA) ---
+                        List<int> indexes = selectedSlots.map((slot) => timeSlots.indexOf(slot)).toList();
+                        indexes.sort();
+                        bool isConsecutive = true;
+                        for (int i = 0; i < indexes.length - 1; i++) {
+                          if (indexes[i + 1] != indexes[i] + 1) {
+                            isConsecutive = false;
+                            break;
+                          }
+                        }
+                        if (!isConsecutive) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Jam harus berurutan!"), backgroundColor: Colors.red));
+                          return;
+                        }
+
+                        // --- OLAH DATA AKHIR ---
+                        String firstSlot = timeSlots[indexes.first];
+                        String lastSlot = timeSlots[indexes.last];
+                        String startTime = firstSlot.split(" - ")[0];
+                        String endTime = lastSlot.split(" - ")[1];
+                        String finalTimeRange = "$startTime - $endTime";
+                        int totalPrice = (fieldData!['price_per_hour'] as num).toInt() * selectedSlots.length;
+
+                        Navigator.pop(context);
+
+                        // KIRIM DATA (TERMASUK TANGGAL YANG DIPILIH)
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookingSummaryScreen(
+                              fieldId: widget.fieldId,
+                              fieldName: fieldData!['name'],
+                              fieldLocation: fieldData!['address'] ?? 'Surabaya',
+                              fieldImage: fieldData!['image_url'] ?? 'assets/images/placeholder.png',
+                              
+                              selectedDate: tempSelectedDate, // <--- INI PAKE TANGGAL PILIHAN USER
+                              
+                              selectedTime: finalTimeRange,
+                              price: totalPrice,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text("Lanjut Pembayaran", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                    ),
+                  )
+                ],
+              ),
+            );
+          }
+        );
+      }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Loading State
     if (isLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator(color: AppColors.darkBackground)),
       );
     }
 
-    // Jika data tidak ditemukan
     if (fieldData == null) {
       return const Scaffold(body: Center(child: Text("Data lapangan tidak ditemukan")));
     }
@@ -115,24 +318,19 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // 1. GAMBAR HEADER (Background)
+          // 1. GAMBAR HEADER
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 300, // Tinggi gambar
+            top: 0, left: 0, right: 0, height: 300,
             child: Image.network(
-              fieldData!['image_url'] ?? 'https://via.placeholder.com/400x300', // Gambar dummy jika null
+              fieldData!['image_url'] ?? 'https://via.placeholder.com/400x300',
               fit: BoxFit.cover,
               errorBuilder: (ctx, error, stackTrace) => Container(color: Colors.grey),
             ),
           ),
 
-          // Tombol Back & Share di atas gambar
+          // Tombol Back
           Positioned(
-            top: 40,
-            left: 16,
-            right: 16,
+            top: 40, left: 16, right: 16,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -143,14 +341,13 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                // (Opsional) Tombol Share/Love bisa ditambah disini
               ],
             ),
           ),
 
-          // 2. KONTEN UTAMA (Sheet Putih Melengkung)
+          // 2. KONTEN UTAMA
           Positioned.fill(
-            top: 220, // Mulai menimpa gambar sedikit
+            top: 220,
             child: Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -164,44 +361,29 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Judul & Jarak
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               child: Text(
                                 fieldData!['name'],
-                                style: const TextStyle(
-                                  fontSize: 22, 
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.darkBackground,
-                                ),
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkBackground),
                               ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFC700),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                '7.7 km', // Hardcode jarak (karena butuh GPS real)
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
+                              decoration: BoxDecoration(color: const Color(0xFFFFC700), borderRadius: BorderRadius.circular(20)),
+                              child: const Text('7.7 km', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
 
-                        // Rating & Diskon
                         Row(
                           children: [
                             const Icon(Icons.star, color: Colors.amber, size: 18),
                             const SizedBox(width: 4),
-                            Text(
-                              '${averageRating.toStringAsFixed(1)} ($reviewCount)',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            Text('${averageRating.toStringAsFixed(1)} ($reviewCount)', style: const TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(width: 16),
                             const Icon(Icons.verified, color: Colors.orange, size: 18),
                             const SizedBox(width: 4),
@@ -210,41 +392,22 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
                         ),
                         const SizedBox(height: 16),
 
-                        // Alamat
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(Icons.location_on, color: Colors.blue, size: 20),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    fieldData!['address'] ?? 'Alamat tidak tersedia',
-                                    style: const TextStyle(color: Colors.grey, fontSize: 13),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  GestureDetector(
-                                    onTap: () {
-                                      // TODO: Buka Google Maps
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Buka Google Maps...")));
-                                    },
-                                    child: const Text(
-                                      "Buka di Google Maps",
-                                      style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 12),
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                fieldData!['address'] ?? 'Alamat tidak tersedia',
+                                style: const TextStyle(color: Colors.grey, fontSize: 13),
+                                maxLines: 2, overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 20),
 
-                        // --- TAB BAR ---
                         TabBar(
                           controller: _tabController,
                           labelColor: AppColors.darkBackground,
@@ -266,11 +429,8 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        // TAB 1: FASILITAS
                         _buildFacilitiesTab(),
-
-                        // TAB 2: REVIEW
-                        _buildReviewsTab(),
+                        _buildReviewsTab(), 
                       ],
                     ),
                   ),
@@ -281,18 +441,12 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
         ],
       ),
 
-      // 3. BOTTOM BAR (Harga & Tombol Sewa)
+      // 3. BOTTOM BAR (TOMBOL SEWA)
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
         ),
         child: Row(
           children: [
@@ -309,10 +463,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
             ),
             const Spacer(),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Arahkan ke halaman Booking form
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lanjut ke Booking...")));
-              },
+              onPressed: _showBookingModal, 
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.darkBackground,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
@@ -326,33 +477,20 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
     );
   }
 
-  // --- WIDGET TAB: FASILITAS ---
+  // --- TAB: FASILITAS ---
   Widget _buildFacilitiesTab() {
-    if (facilitiesList.isEmpty) {
-      return const Center(child: Text("Belum ada data fasilitas"));
-    }
-
+    if (facilitiesList.isEmpty) return const Center(child: Text("Belum ada data fasilitas"));
     return ListView.builder(
       padding: const EdgeInsets.all(24),
       itemCount: facilitiesList.length,
       itemBuilder: (context, index) {
-        final item = facilitiesList[index];
-        // Kita pakai icon statis untuk semua fasilitas karena stringnya dinamis
-        // (Untuk icon dinamis butuh logic if/else yang panjang: if item=='Wifi' return IconWifi)
         return Padding(
           padding: const EdgeInsets.only(bottom: 16.0),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.check_circle_outline, color: AppColors.darkBackground, size: 20),
-              ),
+              const Icon(Icons.check_circle_outline, color: AppColors.darkBackground, size: 20),
               const SizedBox(width: 16),
-              Text(item, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              Text(facilitiesList[index], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             ],
           ),
         );
@@ -360,81 +498,13 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
     );
   }
 
-  // --- WIDGET TAB: REVIEW ---
+  // --- TAB: REVIEW ---
   Widget _buildReviewsTab() {
-    if (reviewsList.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.rate_review_outlined, size: 48, color: Colors.grey),
-            SizedBox(height: 8),
-            Text("Belum ada review", style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(24),
-      itemCount: reviewsList.length,
-      itemBuilder: (context, index) {
-        final review = reviewsList[index];
-        final user = review['users']; // Data user hasil join
-        final userName = user != null ? user['name'] ?? 'Anonim' : 'Anonim';
-        final userPic = user != null ? user['profile_picture'] : null;
-        final rating = review['rating'] ?? 0;
-        final comment = review['comment'] ?? '';
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: userPic != null 
-                    ? NetworkImage(userPic) 
-                    : const NetworkImage('https://i.pravatar.cc/100'),
-              ),
-              const SizedBox(width: 12),
-              // Isi Review
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Nama & Rating
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(userName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.star, size: 12, color: Colors.amber),
-                              const SizedBox(width: 2),
-                              Text('$rating', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.amber)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    // Komentar
-                    Text(comment, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    return SingleChildScrollView(
+      child: ReviewListSection(
+        fieldId: widget.fieldId,
+        isOwner: true, 
+      ),
     );
   }
 }

@@ -30,14 +30,13 @@ class ReviewService {
     try {
       final response = await _supabase
           .from('reviews')
-          .select()
+          .select('*, users(name, profile_picture)') 
           .eq('field_id', fieldId)
           .order('created_at', ascending: false);
 
       final data = response as List<dynamic>;
       return data.map((json) => ReviewModel.fromJson(json)).toList();
     } catch (e) {
-      // Return empty list jika error atau data kosong
       return [];
     }
   }
