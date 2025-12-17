@@ -6,8 +6,8 @@ import 'package:tekber7/widgets/field_card.dart';
 import 'package:tekber7/screens/booking/booking_history_screen.dart';
 import 'package:tekber7/services/auth_service.dart';
 import 'package:tekber7/screens/home/profile_screen.dart';
+import 'package:tekber7/screens/home/all_fields_screen.dart';
 import 'field_detail_screen.dart'; 
-import 'all_fields_screen.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onFilterChanged: _onFilterChanged,
         onCityChanged: _onCityChanged, // Pass handler city
       ),
-      const Center(child: Text('Halaman Lapangan')), // Placeholder Tab 2
+      AllFieldsScreen(initialCity: _selectedCity, initialFilter: 'Terdekat'), // Placeholder Tab 2
       const BookingHistoryScreen(),
       const ProfileScreen(),
     ];

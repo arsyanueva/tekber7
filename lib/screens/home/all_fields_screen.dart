@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/field_model.dart';
 import '../../widgets/field_card.dart';
 import '../../utils/app_colors.dart';
+import 'field_detail_screen.dart'; // Pastikan import ini ada!
 
 class AllFieldsScreen extends StatefulWidget {
   final String initialCity;
@@ -92,9 +93,28 @@ class _AllFieldsScreenState extends State<AllFieldsScreen> {
                 padding: const EdgeInsets.all(20),
                 itemCount: fields.length,
                 itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: SizedBox(width: double.infinity, child: FieldCard(field: fields[index])),
+                  final field = fields[index];
+                  
+                  // --- [UPDATE DI SINI] ---
+                  // Bungkus Padding/FieldCard dengan GestureDetector
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FieldDetailScreen(
+                            fieldId: field.id, 
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: SizedBox(
+                        width: double.infinity, 
+                        child: FieldCard(field: field),
+                      ),
+                    ),
                   );
                 },
               ),
