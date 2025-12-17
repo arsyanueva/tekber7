@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // <--- [PENTING] Import Paket Provider
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart'; 
+
+// Import Provider kamu (Pastikan path folder-nya bener ya)
+import 'package:tekber7/providers/review_provider.dart'; 
 
 import 'routes/app_routes.dart';
 import 'screens/temp_loading_screen.dart'; 
@@ -17,7 +21,16 @@ Future<void> main() async {
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuYnBsZ3ljanZsZmZhaHdlaGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwODAzNjQsImV4cCI6MjA3OTY1NjM2NH0.xXIlTmuxm6boAPsgJxK3xkrTsoYnkt3RCEbhkTrRAzM',
   );
 
-  runApp(const MyApp());
+  // --- [UPDATE] BUNGKUS APLIKASI DENGAN PROVIDER ---
+  runApp(
+    MultiProvider(
+      providers: [
+        // Daftarkan ReviewProvider di sini biar Global (Bisa diakses dari mana aja)
+        ChangeNotifierProvider(create: (_) => ReviewProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

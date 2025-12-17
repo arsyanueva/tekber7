@@ -23,7 +23,7 @@ class PaymentSuccessScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: const Text("Pembayaran Berhasil", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        automaticallyImplyLeading: false, // Ilangin tombol back di appbar
+        automaticallyImplyLeading: false, 
       ),
       body: Column(
         children: [

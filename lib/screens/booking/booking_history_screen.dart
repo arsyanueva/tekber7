@@ -1,28 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/utils/app_colors.dart';
 import 'package:tekber7/routes/app_routes.dart';
-import 'package:tekber7/screens/home/field_detail_screen.dart'; 
+import 'package:tekber7/screens/home/field_detail_screen.dart';
+import 'package:provider/provider.dart'; // <--- WAJIB ADA
+import 'package:tekber7/providers/review_provider.dart'; // <--- Sesuaikan path provider kamu
 
-// --- MODEL DATA ---
-class BookingHistoryItem {
-  final String id;
-  final String fieldId;
-  final String fieldName;
-  final String date;
-  final String time;
-  final String status; // 'pending', 'confirmed', 'completed', 'cancelled'
-
-  BookingHistoryItem({
-    required this.id,
-    required this.fieldId,
-    required this.fieldName,
-    required this.date,
-    required this.time,
-    required this.status,
-  });
-}
+// Import Model & Service Kita
+import 'package:tekber7/models/booking_model.dart';
+import 'package:tekber7/services/booking_service.dart';
 
 class BookingHistoryScreen extends StatefulWidget {
   const BookingHistoryScreen({super.key});
@@ -32,10 +18,10 @@ class BookingHistoryScreen extends StatefulWidget {
 }
 
 class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
-  // List penampung data dari Database
-  List<BookingHistoryItem> upcomingList = []; // Status: pending, confirmed
-  List<BookingHistoryItem> historyList = [];  // Status: completed, cancelled
+  final BookingService _bookingService = BookingService();
   
+  List<BookingModel> upcomingList = []; // Status: pending, confirmed
+  List<BookingModel> historyList = [];  // Status: completed, cancelled
   bool isLoading = true;
 
   @override
@@ -44,58 +30,20 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     _fetchBookingData();
   }
 
-  // --- FUNGSI AMBIL DATA DARI SUPABASE ---
+  // --- PAKAI BOOKING SERVICE (BIAR RAPI) ---
   Future<void> _fetchBookingData() async {
     try {
-      final supabase = Supabase.instance.client;
-      final user = supabase.auth.currentUser;
+      // Panggil fungsi dari service yang udah kita buat
+      final allBookings = await _bookingService.getUserBookings();
 
-      if (user == null) {
-        if (mounted) setState(() => isLoading = false);
-        return;
-      }
+      List<BookingModel> tempUpcoming = [];
+      List<BookingModel> tempHistory = [];
 
-      final response = await supabase
-          .from('bookings')
-          .select('*, fields(name)') 
-          .eq('renter_id', user.id)
-          .order('booking_date', ascending: false);
-
-      final data = response as List<dynamic>;
-
-      List<BookingHistoryItem> tempUpcoming = [];
-      List<BookingHistoryItem> tempHistory = [];
-
-      for (var item in data) {
-        final fieldData = item['fields'];
-        final String nameOfField = fieldData != null ? fieldData['name'] : 'Lapangan Tidak Dikenal';
-
-        DateTime bookingDate;
-        try {
-          bookingDate = DateTime.parse(item['booking_date']);
-        } catch (e) {
-          bookingDate = DateTime.now();
-        }
-        final String formattedDate = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(bookingDate);
-
-        final String startTime = (item['start_time'] ?? '00:00').toString().substring(0, 5);
-        final String endTime = (item['end_time'] ?? '00:00').toString().substring(0, 5);
-        
-        final String status = item['status'] ?? 'pending';
-
-        final bookingItem = BookingHistoryItem(
-          id: item['id'],
-          fieldId: item['field_id'],
-          fieldName: nameOfField,
-          date: formattedDate,
-          time: '$startTime - $endTime',
-          status: status,
-        );
-
-        if (status == 'pending' || status == 'confirmed') {
-          tempUpcoming.add(bookingItem);
+      for (var item in allBookings) {
+        if (item.status == 'pending' || item.status == 'confirmed') {
+          tempUpcoming.add(item);
         } else {
-          tempHistory.add(bookingItem);
+          tempHistory.add(item);
         }
       }
 
@@ -110,6 +58,11 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
       debugPrint('Error fetching booking data: $e');
       if (mounted) setState(() => isLoading = false);
     }
+  }
+
+  // Helper format tanggal
+  String _formatDate(DateTime date) {
+    return DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date);
   }
 
   @override
@@ -152,7 +105,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     );
   }
 
-  Widget _buildListContent(List<BookingHistoryItem> items, {required bool isHistoryTab}) {
+  Widget _buildListContent(List<BookingModel> items, {required bool isHistoryTab}) {
     if (items.isEmpty) {
       return Center(
         child: Column(
@@ -182,15 +135,22 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     );
   }
 
-  Widget _buildBookingCard(BuildContext context, BookingHistoryItem item, bool isHistoryTab) {
+  Widget _buildBookingCard(BuildContext context, BookingModel item, bool isHistoryTab) {
     Color statusColor = Colors.orange;
     if (item.status == 'confirmed') statusColor = Colors.green;
     if (item.status == 'completed') statusColor = Colors.blue;
     if (item.status == 'cancelled') statusColor = Colors.red;
 
+    // --- [PERBAIKAN LOGIC NAMA] ---
+    // 1. Cek apakah ada nama asli dari database (item.fieldName).
+    // 2. Kalau NULL/KOSONG, pake "Lapangan Futsal" (Jangan pake ID biar rapi).
+    String finalName = item.fieldName ?? "Lapangan Futsal"; 
+    
+    // Fallback kalau mau nampilin ID cuma buat debug (opsional)
+    // String finalName = item.fieldName ?? "Lapangan #${item.fieldId.substring(0, 4)}";
+
     return GestureDetector(
       onTap: () {
-        // Navigasi ke FieldDetailScreen
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -201,7 +161,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFC700),
+          color: const Color(0xFFFFC700), // Kuning
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -213,7 +173,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
         ),
         child: Column(
           children: [
-            // HEADER KARTU
+            // HEADER KARTU (ITEM - ATAS)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: const BoxDecoration(
@@ -225,8 +185,9 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      item.fieldName,
+                      finalName, // <--- SEKARANG PAKE NAMA YANG RAPI
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
@@ -244,7 +205,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
               ),
             ),
 
-            // BODY KARTU
+            // BODY KARTU (KUNING - BAWAH)
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -263,26 +224,27 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.fieldName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        // Nama Lapangan diulang atau Info tambahan
+                        Text(finalName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         const SizedBox(height: 4),
-                        Text(item.date, style: const TextStyle(fontSize: 12)),
-                        Text(item.time, style: const TextStyle(fontSize: 12)),
+                        Text(_formatDate(item.bookingDate), style: const TextStyle(fontSize: 12)),
+                        Text("${item.startTime} - ${item.endTime}", style: const TextStyle(fontSize: 12)),
                       ],
                     ),
                   ),
 
-                  // Tombol Aksi (Review / Chat)
+                  // TOMBOL AKSI
                   if (isHistoryTab)
                     ElevatedButton(
                       onPressed: item.status == 'completed'
                           ? () {
                               Navigator.pushNamed(
                                 context,
-                                AppRoutes.addReview,
+                                AppRoutes.addReview, 
                                 arguments: {
                                   'bookingId': item.id,
                                   'fieldId': item.fieldId,
-                                  'fieldName': item.fieldName,
+                                  'fieldName': finalName,
                                 },
                               );
                             }
