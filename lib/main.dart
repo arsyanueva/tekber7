@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      initialRoute: '/forget-password',
+      initialRoute: '/temp-login',
       
       // --- TEKNIK PENGGABUNGAN RUTE (FUSION!) ---
       routes: {

@@ -31,7 +31,7 @@ class _TempLoadingScreenState extends State<TempLoadingScreen> {
     try {
       await supabase.auth.signInWithPassword(
         email: 'test@admin.com', 
-        password: 'admin123',
+        password: '12345678',
       );
 
       if (mounted) {
