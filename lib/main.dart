@@ -13,6 +13,7 @@ import 'screens/booking/booking_summary_screen.dart'; // File Ke-2
 
 import 'package:tekber7/screens/password/change_password_screen.dart';
 import 'package:tekber7/screens/home/profile_screen.dart';
+import 'package:tekber7/screens/home/change_profile_screen.dart';
 
 import 'package:tekber7/screens/password/forget_password_screen.dart';
 
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
         '/change-password': (context) => const ChangePasswordScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/forget-password': (context) => const ResetPasswordFlow(),
+        '/change-profile': (context) => const ChangeProfileScreen(),
       },
     );
   }
