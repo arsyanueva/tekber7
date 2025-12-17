@@ -37,7 +37,6 @@ class ReviewService {
       final data = response as List<dynamic>;
       return data.map((json) => ReviewModel.fromJson(json)).toList();
     } catch (e) {
-      print("Error fetching reviews: $e");
       return [];
     }
   }
