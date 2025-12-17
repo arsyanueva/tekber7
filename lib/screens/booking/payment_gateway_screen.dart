@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/models/booking_model.dart';
-import 'package:tekber7/services/booking_service.dart';
+import 'package:tekber7/services/booking_services.dart';
 import 'payment_success_screen.dart';
 
 class PaymentGatewayScreen extends StatefulWidget {
@@ -28,7 +28,7 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
   bool _isLoading = false;
 
   Future<void> _processPayment() async {
-    // Validasi PIN (Dummy aja, asal gak kosong)
+    // Validasi PIN
     if (_pinController.text.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("PIN harus 6 digit!"), backgroundColor: Colors.red));
       return;
@@ -36,23 +36,29 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
 
     setState(() => _isLoading = true);
 
-    // Simulasi Koneksi ke Bank...
-    await Future.delayed(const Duration(seconds: 3));
+    // Simulasi Loading Bank...
+    await Future.delayed(const Duration(seconds: 2));
 
     try {
-      // Panggil Service Update Database
-      await _bookingService.confirmPaymentMock(widget.booking.id, widget.paymentMethod);
+      // --- PERBAIKAN DI SINI ---
+      // Jangan pakai update, tapi pakai createBooking (Insert)
+      await _bookingService.createBooking(widget.booking);
 
       if (mounted) {
-        // Redirect ke Success Screen (Hapus history biar gak bisa back ke PIN)
+        // Redirect ke Success Screen
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => PaymentSuccessScreen(booking: widget.booking)),
-          (route) => false, // Hapus semua rute sebelumnya (Clean Slate)
+          (route) => false, 
         );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Gagal: $e")));
+      if (mounted) {
+        // Tampilkan error asli biar tau salahnya dimana
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal: $e"), backgroundColor: Colors.red)
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

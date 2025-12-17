@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../routes/app_routes.dart';
-import '../../utils/app_colors.dart';
+import 'package:tekber7/utils/app_colors.dart';
 
 class LoginMethodScreen extends StatelessWidget {
   const LoginMethodScreen({super.key});
@@ -19,113 +18,130 @@ class LoginMethodScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
-
-              // Ilustrasi
-              Container(
-                height: 250,
-                width: double.infinity,
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.sports_soccer,
-                  size: 100,
-                  color: Colors.grey,
-                ),
+              const Spacer(),
+              
+              // 1. ILUSTRASI GAMBAR (Pemain Bola)
+              Image.asset(
+                'assets/images/loginmethod.png', 
+                height: 250, 
               ),
 
               const SizedBox(height: 30),
 
+              // 2. JUDUL BESAR
               const Text(
                 'Selamat datang di Field Master!',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.darkBackground,
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              const Text(
-                'Pilih metode login untuk melanjutkan.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.greyText,
-                ),
-              ),
-
-              const Spacer(),
-
-              // LOGIN VIA PHONE
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () => _goToIdentityInput(context, 'phone'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkBackground,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Masuk dengan nomor handphone',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  color: Color(0xFF2B2930), // Warna gelap text
                 ),
               ),
 
               const SizedBox(height: 12),
 
-              // LOGIN VIA EMAIL
+              // 3. SUBTITLE
+              const Text(
+                'Pilih metode login untuk melanjutkan.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // 4. TOMBOL DAFTAR DENGAN EMAIL (Ganti Handphone jadi Email)
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: OutlinedButton(
-                  onPressed: () => _goToIdentityInput(context, 'email'),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.darkBackground),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Arahkan ke screen Register yang tadi kita buat
+                    Navigator.pushNamed(context, '/role-selection');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkBackground, // Warna tombol hitam/gelap
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: const Text(
-                    'Masuk dengan Gmail',
-                    style: TextStyle(
-                      color: AppColors.darkBackground,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "Daftar dengan Email", // Disesuaikan dengan backend
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              // KE REGISTER
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.registerMethod);
-                },
-                child: const Text(
-                  'Belum punya akun? Daftar di sini',
-                  style: TextStyle(
-                    color: AppColors.greyText,
-                    fontWeight: FontWeight.bold,
+              // 5. TOMBOL DAFTAR DENGAN GOOGLE
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Logika Google Sign In (Nanti diimplementasikan)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Fitur Google Sign In Segera Hadir")),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEFEFEF), // Warna abu-abu muda
+                    foregroundColor: Colors.black,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Icon Google (Pastikan punya iconnya, atau pakai Icon default sementara)
+                      Image.asset('assets/images/google.png', height: 24),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Daftar dengan Google",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const Spacer(),
+
+              // 6. TEKS LOGIN (Sudah punya akun? Masuk disini)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Sudah punya akun? ", style: TextStyle(color: Colors.grey)),
+                  GestureDetector(
+                    onTap: () {
+                      // Arahkan ke screen Login yang tadi kita buat
+                      Navigator.pushNamed(context, '/login-email');
+                    },
+                    child: const Text(
+                      "Masuk disini",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2B2930),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),

@@ -14,7 +14,7 @@ class PaymentSuccessScreen extends StatelessWidget {
     
     const Color primaryBlack = Color(0xFF1E1E1E);
     const Color primaryYellow = Color(0xFFFFD700);
-    const Color bgGrey = Color(0xFFF5F5F5);
+    // const Color bgGrey = Color(0xFFF5F5F5); // Unused, boleh dihapus
 
     return Scaffold(
       backgroundColor: primaryBlack,
@@ -23,7 +23,7 @@ class PaymentSuccessScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: const Text("Pembayaran Berhasil", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        automaticallyImplyLeading: false, // Ilangin tombol back di appbar
+        automaticallyImplyLeading: false, 
       ),
       body: Column(
         children: [
@@ -48,15 +48,20 @@ class PaymentSuccessScreen extends StatelessWidget {
                     const SizedBox(height: 30),
                     
                     // Detail Sewa
-                    Align(alignment: Alignment.centerLeft, child: const Text("Data Sewa Lapangan :", style: TextStyle(fontSize: 14, color: Colors.grey))),
+                    const Align(alignment: Alignment.centerLeft, child: Text("Data Sewa Lapangan :", style: TextStyle(fontSize: 14, color: Colors.grey))),
                     const SizedBox(height: 15),
                     _buildDetailRow("Tanggal", formattedDate),
                     _buildDetailRow("Waktu", "${booking.startTime} - ${booking.endTime}"),
-                    _buildDetailRow("Nomor Lapangan", "2"), // Hardcode dulu
+                    _buildDetailRow("Nomor Lapangan", "2"), // Hardcode sementara (nanti ambil dari API lapangan)
                     
                     const Padding(padding: EdgeInsets.symmetric(vertical: 15), child: Divider()),
                     
-                    _buildDetailRow("Metode Pembayaran", "Transfer BCA", valueBold: true),
+                    // [UPDATE] Ambil Metode Pembayaran dari Booking Model biar Dinamis
+                    _buildDetailRow(
+                      "Metode Pembayaran", 
+                      booking.paymentMethod ?? "Transfer Bank", // Fallback kalau null
+                      valueBold: true
+                    ),
                     const SizedBox(height: 20),
 
                     // Total Biaya Highlight Kuning
@@ -88,8 +93,12 @@ class PaymentSuccessScreen extends StatelessWidget {
                   side: const BorderSide(color: primaryBlack),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
                 ),
-                // Balik ke Home
-                onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                // --- [FIX: LOGIC TOMBOL KEMBALI] ---
+                onPressed: () {
+                   // Hapus semua history page sebelumnya & balik ke Home
+                   // Pastikan di main.dart rutenya '/home' ya!
+                   Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                },
                 child: const Text("Kembali", style: TextStyle(color: primaryBlack, fontWeight: FontWeight.bold)),
               ),
             ),
