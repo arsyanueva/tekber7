@@ -35,33 +35,19 @@ Future<void> main() async {
   );
 }
 
-import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Field Master',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFFD700)),
-          useMaterial3: true,
-        ),
-        initialRoute: AppRoutes.welcome,
-        routes: {
-          ...AppRoutes.getRoutes(),
-          '/temp-login': (context) => const TempLoadingScreen(),
-        },
-        onGenerateRoute: AppRoutes.onGenerateRoute,
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Field Master',
+      
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFFD700)),
+        useMaterial3: true,
       ),
-<<<<<<< Updated upstream
 
       initialRoute: '/',
       
@@ -75,8 +61,6 @@ class MyApp extends StatelessWidget {
         '/forget-password': (context) => const ResetPasswordFlow(),
         '/change-profile': (context) => const ChangeProfileScreen(),
       },
-=======
->>>>>>> Stashed changes
     );
   }
 }

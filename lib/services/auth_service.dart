@@ -1,5 +1,4 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/user_model.dart';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -22,15 +21,6 @@ class AuthService {
     } catch (e) {
       return null;
     }
-
-    final inserted = await _supabase.from('users').insert({
-      ...payload,
-      'name': name,
-      'role': role,
-      'is_verified': true,
-    }).select().single();
-
-    return UserModel.fromJson(inserted);
   }
 
   // --- [UPDATE] FUNGSI REGISTER DENGAN ROLE ---
@@ -76,20 +66,5 @@ class AuthService {
   // Fungsi Logout
   Future<void> signOut() async {
     await _supabase.auth.signOut();
-  }
-
-  // Check if user exists
-  Future<bool> userExists(String identifier, String method) async {
-    final payload = method == 'email'
-        ? {'email': identifier}
-        : {'phone_number': identifier};
-
-    final user = await _supabase
-        .from('users')
-        .select()
-        .match(payload)
-        .maybeSingle();
-
-    return user != null;
   }
 }
