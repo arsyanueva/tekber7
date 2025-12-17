@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:tekber7/models/booking_model.dart';
-import 'package:tekber7/services/booking_service.dart';
-import 'package:tekber7/screens/booking/reschedule_success_screen.dart';
+import 'package:intl/intl.dart'; // Pastikan package ini sudah diinstall (Langkah 1)
+import '../../services/booking_service.dart'; // Import Service
+import 'reschedule_success_screen.dart'; // Lanjut ke halaman sukses
 
 class ConfirmRescheduleScreen extends StatefulWidget {
-  final BookingModel oldBooking; 
+  final String bookingId; // MENERIMA ID
+  final String fieldId;
   final DateTime newDate;
-  final String newStartTime; 
-  final String newEndTime;   
+  final String reason;
 
   const ConfirmRescheduleScreen({
-    super.key,
-    required this.oldBooking,
-    required this.newDate,
-    required this.newStartTime,
-    required this.newEndTime,
+    super.key, 
+    required this.bookingId, // WAJIB DIISI
+    required this.fieldId,
+    required this.newDate, 
+    required this.reason
   });
 
   @override
@@ -23,137 +22,176 @@ class ConfirmRescheduleScreen extends StatefulWidget {
 }
 
 class _ConfirmRescheduleScreenState extends State<ConfirmRescheduleScreen> {
-  final BookingService _bookingService = BookingService();
   bool _isLoading = false;
-  
-  final Color _primaryDark = const Color(0xFF1E1E1E);   
-  final Color _primaryYellow = const Color(0xFFFFC700); 
+  final BookingService _bookingService = BookingService(); // Panggil Service
+  DateTime _selectedDate = DateTime.now().add(const Duration(days: 1)); 
+  String _selectedStartTime = "08:00"; 
+  String _selectedEndTime = "09:00";
 
+  // Helper format tanggal (Sekarang pakai intl biar rapi)
   String _formatDate(DateTime date) {
-    return DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date);
-  }
-
-  Future<void> _handleConfirm() async {
-    setState(() => _isLoading = true);
-    try {
-      await _bookingService.updateBookingSchedule(widget.oldBooking.id, widget.newDate, widget.newStartTime, widget.newEndTime);
-      
-      if (mounted) {
-        // --- UPDATED: MENGIRIM DATA KE HALAMAN SUKSES ---
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RescheduleSuccessScreen(
-              newDate: widget.newDate,          // Kirim Tanggal Baru
-              newStartTime: widget.newStartTime, // Kirim Jam Mulai Baru
-              newEndTime: widget.newEndTime,     // Kirim Jam Selesai Baru
-            )
-          )
-        );
-        // ------------------------------------------------
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Gagal: $e")));
-        setState(() => _isLoading = false);
-      }
-    }
+    return DateFormat('d MMMM yyyy', 'id_ID').format(date);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
+      
+      // HEADER
       appBar: AppBar(
-        backgroundColor: _primaryDark,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(icon: Icon(Icons.arrow_back, color: _primaryYellow), onPressed: () => Navigator.pop(context)),
-        title: Row(
+        backgroundColor: const Color(0xFF1E1E1E),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFFFFC107)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.assignment_turned_in_rounded, color: _primaryYellow, size: 24),
-            const SizedBox(width: 8),
-            Text('Konfirmasi Perubahan', style: TextStyle(color: _primaryYellow, fontWeight: FontWeight.bold, fontSize: 18)),
+            Icon(Icons.edit_document, color: Color(0xFFFFC107), size: 20),
+            SizedBox(width: 10),
+            Text(
+              "Konfirmasi Perubahan Jadwal",
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        centerTitle: true,
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // KARTU RINGKASAN
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5, offset: const Offset(0, 2))],
+              ),
+              child: Column(
+                children: [
+                  // Header Hitam
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(15),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1E1E1E),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                    ),
+                    child: const Text("Bhaskara Futsal Arena", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                  
+                  // Isi
+                  Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Highlight Jadwal Baru (Kuning)
+                        Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFC107),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.calendar_month, size: 40),
+                              const SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Jadwal Baru Anda:", style: TextStyle(fontSize: 12)),
+                                  Text(
+                                    _formatDate(widget.newDate),
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  ),
+                                  const Text("Lapangan 2 | 10:00", style: TextStyle(fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        const Text("Alasan Anda:", style: TextStyle(color: Colors.grey)),
+                        const SizedBox(height: 5),
+                        Text(widget.reason, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                  
+                  // Total Biaya 0
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.1),
+                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(15)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Total Biaya Perubahan"),
+                        Text("Rp 0", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
           ],
         ),
       ),
-      body: SingleChildScrollView(
+      
+      // TOMBOL KONFIRMASI (EKSEKUSI KE SUPABASE)
+      bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
-        child: Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)]),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: _primaryYellow,
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.oldBooking.fieldName ?? "Lapangan Futsal", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.sports_soccer, size: 30),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Lapangan 2", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text("${_formatDate(widget.newDate)} | ${widget.newStartTime}", style: const TextStyle(fontSize: 12)),
-                          ],
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildDetailRow("Tanggal Lama", _formatDate(widget.oldBooking.bookingDate)),
-                    _buildDetailRow("Jam Lama", "${widget.oldBooking.startTime} - ${widget.oldBooking.endTime}"),
-                    const SizedBox(height: 10),
-                    _buildDetailRow("Tanggal Baru", _formatDate(widget.newDate), isNew: true),
-                    _buildDetailRow("Jam Baru", "${widget.newStartTime} - ${widget.newEndTime}", isNew: true),
-                  ],
-                ),
-              ),
-            ],
+        color: Colors.white,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF1E1E1E),
+            minimumSize: const Size(double.infinity, 50),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
+          onPressed: _isLoading ? null : () async {
+            setState(() => _isLoading = true);
+            
+            // 1. PANGGIL SERVICE UNTUK UPDATE KE DATABASE
+            bool success = await _bookingService.rescheduleBooking(
+              bookingId: widget.bookingId,       // ID Booking
+              fieldId: widget.fieldId,           // ID Lapangan (Pastiin variabelnya ada di widget ini)
+              newDate: _selectedDate,             // Tanggal Baru yang dipilih
+              newStartTime: _selectedStartTime,   // Jam Mulai Baru (Format "HH:mm", misal "18:00")
+              newEndTime: _selectedEndTime,       // Jam Selesai Baru (Format "HH:mm", misal "19:00")
+            );
+            
+            if (mounted) {
+              setState(() => _isLoading = false);
+              
+              if (success) {
+                // 2. JIKA SUKSES -> PINDAH KE HALAMAN SUKSES
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RescheduleSuccessScreen(
+                      finalDate: widget.newDate,
+                    ),
+                  ),
+                );
+              } else {
+                // 3. JIKA GAGAL -> MUNCUL PESAN MERAH
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Gagal mengupdate jadwal. Cek koneksi internet."), backgroundColor: Colors.red)
+                );
+              }
+            }
+          },
+          child: _isLoading 
+            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            : const Text("Konfirmasi Perubahan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SizedBox(
-          height: 50,
-          child: ElevatedButton(
-            onPressed: _isLoading ? null : _handleConfirm,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _primaryDark, 
-              foregroundColor: Colors.white, 
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text("Konfirmasi Perubahan", style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value, {bool isNew = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: isNew ? Colors.green[700] : Colors.black)),
-      ]),
     );
   }
 }

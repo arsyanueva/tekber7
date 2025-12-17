@@ -7,6 +7,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:tekber7/providers/review_provider.dart'; 
 
 import 'routes/app_routes.dart';
+import 'screens/temp_loading_screen.dart'; 
+import 'models/booking_model.dart';
+import 'screens/booking/booking_summary_screen.dart'; // File Ke-2
 
 import 'package:tekber7/screens/password/change_password_screen.dart';
 import 'package:tekber7/screens/home/profile_screen.dart';
@@ -52,9 +55,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      // --- PENGATURAN NAVIGASI ---
-      // Mulai dari halaman Welcome (Punya teman)
-      initialRoute: AppRoutes.welcome,
+      initialRoute: '/temp-login',
       
       // --- TEKNIK PENGGABUNGAN RUTE (FUSION!) ---
       routes: {
