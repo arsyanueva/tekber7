@@ -8,6 +8,13 @@ import 'package:tekber7/providers/review_provider.dart';
 
 import 'routes/app_routes.dart';
 import 'screens/temp_loading_screen.dart'; 
+import 'models/booking_model.dart';
+import 'screens/booking/booking_summary_screen.dart'; // File Ke-2
+
+import 'package:tekber7/screens/password/change_password_screen.dart';
+import 'package:tekber7/screens/home/profile_screen.dart';
+
+import 'package:tekber7/screens/password/forget_password_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,6 +63,9 @@ class MyApp extends StatelessWidget {
 
         // Daftarkan TempLoadingScreen di sini sebagai route tambahan
         '/temp-login': (context) => const TempLoadingScreen(),
+        '/change-password': (context) => const ChangePasswordScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/forget-password': (context) => const ResetPasswordFlow(),
       },
     );
   }
