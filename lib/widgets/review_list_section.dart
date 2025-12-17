@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/review_provider.dart';
 import '../models/review_model.dart';
-import 'star_rating_display.dart';
+// Hapus import star_rating jika tidak dipakai, atau biarkan jika ada filenya
+// import 'star_rating_display.dart'; 
 
 class ReviewListSection extends StatefulWidget {
   final String fieldId;
-  final bool isOwner; // Untuk menentukan apakah tombol "Balas" muncul
+  final bool isOwner;
 
   const ReviewListSection({
     super.key, 
@@ -28,6 +29,8 @@ class _ReviewListSectionState extends State<ReviewListSection> {
   }
 
   void _showReplyDialog(BuildContext context, ReviewModel review) {
+    if (review.id == null) return; // Validasi ID
+
     final TextEditingController replyController = TextEditingController();
     showDialog(
       context: context,
@@ -42,7 +45,7 @@ class _ReviewListSectionState extends State<ReviewListSection> {
           ElevatedButton(
             onPressed: () {
               Provider.of<ReviewProvider>(context, listen: false)
-                  .replyReview(review.id, replyController.text, widget.fieldId);
+                  .replyReview(review.id!, replyController.text, widget.fieldId);
               Navigator.pop(context);
             },
             child: const Text("Kirim"),
@@ -69,7 +72,7 @@ class _ReviewListSectionState extends State<ReviewListSection> {
 
         return ListView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(), // Karena biasanya di dalam ScrollView parent
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: provider.reviews.length,
           itemBuilder: (context, index) {
             final review = provider.reviews[index];
@@ -78,16 +81,16 @@ class _ReviewListSectionState extends State<ReviewListSection> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar
                   CircleAvatar(
                     radius: 20,
                     backgroundImage: review.renterAvatarUrl != null 
                         ? NetworkImage(review.renterAvatarUrl!) 
-                        : const AssetImage('assets/user_placeholder.png') as ImageProvider,
+                        : null,
+                    child: review.renterAvatarUrl == null 
+                        ? const Icon(Icons.person) 
+                        : null,
                   ),
                   const SizedBox(width: 12),
-                  
-                  // Konten Review
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,10 +102,6 @@ class _ReviewListSectionState extends State<ReviewListSection> {
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                             const SizedBox(width: 8),
-                            const Text("👍", style: TextStyle(fontSize: 12)),
-                            const SizedBox(width: 4),
-                            
-                            // Badge Rating Kuning Kecil
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
@@ -122,7 +121,7 @@ class _ReviewListSectionState extends State<ReviewListSection> {
                           style: TextStyle(color: Colors.grey[700], fontSize: 13),
                         ),
                         
-                        // Menampilkan Balasan Owner jika ada
+                        // Tampilkan Balasan Owner
                         if (review.ownerReply != null)
                            Container(
                              margin: const EdgeInsets.only(top: 8),
@@ -141,7 +140,7 @@ class _ReviewListSectionState extends State<ReviewListSection> {
                              ),
                            ),
 
-                        // Tombol Balas (Hanya muncul jika user adalah Owner & belum dibalas)
+                        // Tombol Balas (Untuk Owner)
                         if (widget.isOwner && review.ownerReply == null)
                           Padding(
                             padding: const EdgeInsets.only(top: 5),

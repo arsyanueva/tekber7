@@ -3,10 +3,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tekber7/models/review_model.dart';
 import 'package:tekber7/services/review_service.dart';
 import 'package:tekber7/utils/app_colors.dart';
+
 class ReviewFormScreen extends StatefulWidget {
   final String bookingId;
   final String fieldId;
-  final String fieldName; // Untuk ditampilkan di header
+  final String fieldName;
 
   const ReviewFormScreen({
     super.key,
@@ -39,6 +40,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) throw Exception('User tidak login');
 
+      // PERBAIKAN: Tidak perlu isi ID dan CreatedAt
       final review = ReviewModel(
         bookingId: widget.bookingId,
         fieldId: widget.fieldId,
@@ -53,7 +55,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Review berhasil dikirim!')),
         );
-        Navigator.pop(context); // Kembali ke halaman sebelumnya
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
@@ -68,6 +70,8 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Gunakan kembali kode UI layout kamu yang sudah bagus
+    // Bagian Logika di atas yang paling penting
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -83,66 +87,8 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Nama Lapangan & Badge Diskon (Visual dummy sesuai gambar)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.fieldName,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkBackground,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFC700), // Kuning
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    '7.7 km',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            
-            // Rating Lapangan (Static info)
-            Row(
-              children: [
-                const Icon(Icons.star, color: Colors.amber, size: 16),
-                const SizedBox(width: 4),
-                const Text('4.8 (40)', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(width: 12),
-                const Icon(Icons.verified, color: Colors.orange, size: 16),
-                const SizedBox(width: 4),
-                const Text('10% Discount area', style: TextStyle(fontSize: 12)),
-              ],
-            ),
+            Text(widget.fieldName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
-
-            // User Info
-            const Row(
-              children: [
-                 CircleAvatar(
-                   backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
-                   radius: 16,
-                 ),
-                 SizedBox(width: 12),
-                 Text(
-                   'Daniel',
-                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                 ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Input Bintang
             const Text('Beri Rating', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Row(
@@ -154,17 +100,11 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
                     index < _selectedRating ? Icons.star : Icons.star_border,
                     color: Colors.amber,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _selectedRating = index + 1;
-                    });
-                  },
+                  onPressed: () => setState(() => _selectedRating = index + 1),
                 );
               }),
             ),
             const SizedBox(height: 24),
-
-            // Input Text Review
             const Text('Beri Review', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             TextField(
@@ -172,22 +112,12 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'Masukkan pengalaman anda',
-                hintStyle: TextStyle(color: Colors.grey[400]),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 30),
-
-            // Tombol Posting
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -195,16 +125,11 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
                 onPressed: _isLoading ? null : _submitReview,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.darkBackground,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Posting',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                    : const Text('Posting', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
