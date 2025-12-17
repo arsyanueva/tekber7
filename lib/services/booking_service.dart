@@ -3,15 +3,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/booking_model.dart';
 
 class BookingService {
-  // Kita pake standarisasi variabel '_supabase' biar konsisten
+  // Gunakan satu instance SupabaseClient agar konsisten di seluruh fungsi
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // ==========================================
-  // BAGIAN 1: FITUR DATA (Gabungan Punya Temenmu)
-  // ==========================================
+  // ============================================================
+  // BAGIAN 1: AMBIL DATA (SINKRONISASI DENGAN TIM)
+  // ============================================================
 
-  // [PUNYA TEMENMU] Ambil Detail Booking Lengkap (Join Table)
-  // Ini penting biar nama Lapangan & User ketahuan
+  // Ambil Detail Booking Lengkap (Join dengan tabel fields dan users)
   Future<Map<String, dynamic>?> getBookingDetail(String bookingId) async {
     try {
       final response = await _supabase
@@ -27,25 +26,7 @@ class BookingService {
     }
   }
 
-  // [PUNYA TEMENMU] Helper buat Testing (Cari ID pertama)
-  Future<String?> getFirstBookingId() async {
-    try {
-      final response = await _supabase
-          .from('bookings')
-          .select('id')
-          .limit(1);
-      
-      if (response.isNotEmpty) {
-        return response[0]['id'] as String;
-      }
-      return null; 
-    } catch (e) {
-      print("Error cari ID: $e");
-      return null;
-    }
-  }
-
-  // [PUNYA KAMU] Ambil List Booking User (Buat History)
+  // Ambil List Booking milik User yang sedang login (untuk History)
   Future<List<BookingModel>> getUserBookings() async {
     try {
       final userId = _supabase.auth.currentUser!.id;
@@ -63,98 +44,87 @@ class BookingService {
     }
   }
 
-  // ==========================================
-  // BAGIAN 2: LOGIC RESCHEDULE (Punya Kamu - Lebih Lengkap)
-  // ==========================================
+  // ============================================================
+  // BAGIAN 2: FITUR RESCHEDULE (LOGIKA KAMU)
+  // ============================================================
 
-  // Cek Ketersediaan Slot (Wajib ada buat validasi)
+  // Fungsi yang dipanggil oleh ConfirmRescheduleScreen kamu
+  // Menangani pembaruan tanggal dan jam sekaligus
+  Future<void> updateBookingSchedule(
+    String bookingId, 
+    DateTime newDate, 
+    String startTime, 
+    String endTime
+  ) async {
+    try {
+      // Kita update ke database Supabase
+      await _supabase.from('bookings').update({
+        'booking_date': newDate.toIso8601String().split('T')[0], // Simpan format YYYY-MM-DD
+        'start_time': startTime,
+        'end_time': endTime,
+        'status': 'confirmed', // Otomatis confirmed setelah reschedule (atau 'pending' sesuai kebijakan)
+      }).eq('id', bookingId);
+
+      print("Berhasil reschedule booking ID: $bookingId");
+    } catch (e) {
+      print("Error updateBookingSchedule: $e");
+      throw Exception("Gagal memperbarui jadwal: $e");
+    }
+  }
+
+  // Cek Ketersediaan Slot (Validasi agar tidak tabrakan jadwal)
   Future<bool> isSlotAvailable(String fieldId, DateTime date, String startTime, String endTime) async {
     try {
-      await _supabase
+      final response = await _supabase
           .from('bookings')
           .select()
           .eq('field_id', fieldId)
           .eq('booking_date', date.toIso8601String().split('T')[0])
           .neq('status', 'cancelled');
 
-      // Logic sederhana: sementara kita anggap available dulu
-      // Nanti bisa diperketat logic jam-nya
-      return true; 
+      // Sederhananya, jika tidak ada booking di tanggal tersebut, maka tersedia
+      // Untuk logic jam yang lebih detail, bisa dikembangkan di sini
+      return (response as List).isEmpty; 
     } catch (e) {
       return false;
     }
   }
 
-  // Fungsi Reschedule yang KITA PAKAI (Ada jamnya)
-  // Punya temenmu tadi cuma tanggal doang, jadi kurang detail
-  Future<bool> rescheduleBooking({
-    required String bookingId,
-    required String fieldId,
-    required DateTime newDate,
-    required String newStartTime,
-    required String newEndTime,
-  }) async {
-    try {
-      bool isAvailable = await isSlotAvailable(fieldId, newDate, newStartTime, newEndTime);
-      if (!isAvailable) return false;
+  // ============================================================
+  // BAGIAN 3: PEMBAYARAN (SIMULASI & REAL)
+  // ============================================================
 
-      await _supabase.from('bookings').update({
-        'booking_date': newDate.toIso8601String(),
-        'start_time': newStartTime,
-        'end_time': newEndTime,
-        'status': 'pending', 
-      }).eq('id', bookingId);
-
-      return true;
-    } catch (e) {
-      print("Error Reschedule: $e");
-      rethrow;
-    }
-  }
-
-  // ==========================================
-  // BAGIAN 3: PEMBAYARAN (Baru & Lama)
-  // ==========================================
-
-  // [BARU - REQUEST KAMU] Simulasi Bayar Tanpa Upload (Sat Set)
-  // [UPDATE] Sekarang nerima parameter 'paymentMethod'
+  // Konfirmasi Pembayaran tanpa upload file (Simulasi Sat-Set)
   Future<void> confirmPaymentMock(String bookingId, String paymentMethod) async {
-    // --- JALUR TIKUS (Tetap amanin buat testing) ---
-    if (bookingId.contains('test')) {
-      print("Mode Testing: Bayar pake $paymentMethod sukses! 🚀");
-      return; 
-    }
-
     try {
-      // Mapping nama UI ke nama Database (biar rapi)
-      // Misal: "Transfer BCA" -> "bca", "E-Wallet Dana" -> "dana"
-      String dbMethod = 'transfer'; // Default
+      String dbMethod = 'transfer';
       if (paymentMethod.contains('BCA')) dbMethod = 'transfer_bca';
       if (paymentMethod.contains('Dana')) dbMethod = 'ewallet_dana';
       if (paymentMethod.contains('QRIS')) dbMethod = 'qris';
 
       await _supabase.from('bookings').update({
         'status': 'confirmed', 
-        'payment_proof': 'confirmed_by_system_mock', 
-        'payment_method': dbMethod, // <--- INI YANG PENTING
-        // 'updated_at': DateTime.now().toIso8601String(), // Inget ini dihapus kalo DB gada kolomnya
+        'payment_proof': 'confirmed_by_mock_system', 
+        'payment_method': dbMethod,
       }).eq('id', bookingId);
     } catch (e) {
-      print("Error Mock Payment: $e");
+      print("Error Payment Mock: $e");
       rethrow;
     }
   }
 
-  // [LAMA - OPTIONAL] Upload Bukti Bayar (Disimpan aja buat jaga-jaga)
+  // Fungsi Upload Bukti Bayar Asli (Jika dibutuhkan kedepannya)
   Future<void> submitPaymentWithUpload(String bookingId, File imageFile) async {
     try {
       final fileExt = imageFile.path.split('.').last;
-      final fileName = '$bookingId-payment.$fileExt';
+      final fileName = '$bookingId-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
       final filePath = 'payment_proofs/$fileName';
 
+      // Upload ke Storage
       await _supabase.storage.from('booking_assets').upload(filePath, imageFile);
       final imageUrl = _supabase.storage.from('booking_assets').getPublicUrl(filePath);
 
+      // Update URL ke Tabel Bookings
       await _supabase.from('bookings').update({
         'payment_proof': imageUrl,
         'status': 'confirmed',
