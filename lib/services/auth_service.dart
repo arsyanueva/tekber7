@@ -1,62 +1,113 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/user_model.dart';
 
 class AuthService {
   // Bikin instance supabase biar gampang dipanggil
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // 1. Sign Up (Daftar Baru)
-  Future<AuthResponse> signUp({
-    required String email,
-    required String password,
-    required String name,
-    required String role, // 'renter' atau 'owner'
+  Future<void> handleAuth({
+    required String flowType,
+    required String method,
+    required String value,
+    required String role,
   }) async {
-    try {
-      // Daftar ke Supabase Auth
-      final response = await _supabase.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'name': name,
-          'role': role, 
-          // Kita simpan nama & role di metadata auth dulu
-          // Nanti idealnya ada Trigger di Database buat auto-copy ke tabel 'users'
-          // Tapi buat sekarang, kita insert manual di UI atau trigger nanti.
-        },
-      );
-      
-      // Setelah Auth sukses, kita simpan data detail ke tabel 'public.users'
-      if (response.user != null) {
-        await _supabase.from('users').insert({
-          'id': response.user!.id, // PENTING: ID Auth = ID Tabel Users
-          'email': email,
-          'name': name,
-          'role': role,
-          'phone_number': '', // Default kosong dulu
-          'is_verified': false,
-        });
+    final payload = method == 'email'
+        ? {'email': value}
+        : {'phone_number': value};
+
+    if (flowType == 'login') {
+      // Login
+      final user = await _supabase
+          .from('users')
+          .select()
+          .match(payload)
+          .maybeSingle();
+
+      if (user == null) {
+        throw Exception('Akun belum terdaftar');
       }
 
-      return response;
-    } catch (e) {
-      rethrow; // Lempar error biar bisa ditangkep di UI (misal: "Email sudah terdaftar")
+      // optional: update last_login
+      await _supabase.from('users').update({
+        'is_verified': true,
+      }).match(payload);
+
+      return;
+    } else {
+      // Register
+      final existingUser = await _supabase
+          .from('users')
+          .select()
+          .match(payload)
+          .maybeSingle();
+
+      if (existingUser != null) {
+        throw Exception('Akun sudah terdaftar');
+      }
+
+      await _supabase.from('users').insert({
+        ...payload,
+        'role': role,
+        'is_verified': true,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      return;
     }
+  }
+
+  // 1. Sign Up (Daftar Baru)
+  Future<UserModel> registerWithOtp({
+    required String identifier,
+    required String method, // 'email' | 'phone'
+    required String name,
+    required String role,
+  }) async {
+    final payload = method == 'email'
+      ? {'email': identifier}
+      : {'phone_number': identifier};
+
+    final existingUser = await _supabase
+        .from('users')
+        .select()
+        .match(payload)
+        .maybeSingle();
+
+    if (existingUser != null) {
+      throw Exception('User sudah terdaftar');
+    }
+
+    final inserted = await _supabase.from('users').insert({
+      ...payload,
+      'name': name,
+      'role': role,
+      'is_verified': true,
+    }).select().single();
+
+    return UserModel.fromJson(inserted);
   }
 
   // 2. Sign In (Login)
-  Future<AuthResponse> signIn({
-    required String email,
-    required String password,
+  Future<UserModel> loginWithOtp({
+    required String identifier,
+    required String method,
   }) async {
-    try {
-      return await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-    } catch (e) {
-      rethrow;
+    final payload = method == 'email'
+        ? {'email': identifier}
+        : {'phone_number': identifier};
+
+    final user = await _supabase
+        .from('users')
+        .select()
+        .match(payload)
+        .maybeSingle();
+
+    if (user == null) {
+      throw Exception('User belum terdaftar');
     }
+    return UserModel.fromJson(user);
   }
+
 
   // 3. Sign Out (Logout)
   Future<void> signOut() async {
@@ -83,5 +134,20 @@ class AuthService {
     } catch (e) {
       return null;
     }
+  }
+
+  // Check if user exists
+  Future<bool> userExists(String identifier, String method) async {
+    final payload = method == 'email'
+        ? {'email': identifier}
+        : {'phone_number': identifier};
+
+    final user = await _supabase
+        .from('users')
+        .select()
+        .match(payload)
+        .maybeSingle();
+
+    return user != null;
   }
 }

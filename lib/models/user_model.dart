@@ -33,12 +33,13 @@ class UserModel {
   // Dari Dart Object ke JSON (buat dikirim ke Supabase)
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'email': email,
       'name': name,
       'phone_number': phoneNumber,
       'role': role,
       'profile_picture': profilePicture,
-      // 'is_verified' biasanya diurus admin/sistem, jadi gak dikirim pas update profil biasa
+      'is_verified': isVerified,
     };
   }
 }

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/app_colors.dart';
 
-class LoginMethodScreen extends StatelessWidget {
-  const LoginMethodScreen({super.key});
+class RegisterMethodScreen extends StatelessWidget {
+  const RegisterMethodScreen({super.key});
 
-  void _goToIdentityInput(BuildContext context, String method) {
+  void _goToOtp(BuildContext context, String method) {
     Navigator.pushNamed(
       context,
-      AppRoutes.identityInput,
+      AppRoutes.roleSelection,
       arguments: {
-        'flowType': 'login',
-        'method': method,
+        'flowType': 'register',
+        'method': method, // 'phone' | 'email'
       },
     );
   }
@@ -53,7 +53,7 @@ class LoginMethodScreen extends StatelessWidget {
               const SizedBox(height: 10),
 
               const Text(
-                'Pilih metode login untuk melanjutkan.',
+                'Pilih metode pendaftaran untuk melanjutkan.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -63,12 +63,12 @@ class LoginMethodScreen extends StatelessWidget {
 
               const Spacer(),
 
-              // LOGIN VIA PHONE
+              // REGISTER VIA PHONE
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () => _goToIdentityInput(context, 'phone'),
+                  onPressed: () => _goToOtp(context, 'phone'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.darkBackground,
                     shape: RoundedRectangleBorder(
@@ -76,7 +76,7 @@ class LoginMethodScreen extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Masuk dengan nomor handphone',
+                    'Daftar dengan nomor handphone',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -87,12 +87,12 @@ class LoginMethodScreen extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // LOGIN VIA EMAIL
+              // REGISTER VIA EMAIL
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: () => _goToIdentityInput(context, 'email'),
+                  onPressed: () => _goToOtp(context, 'email'),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.darkBackground),
                     shape: RoundedRectangleBorder(
@@ -100,7 +100,7 @@ class LoginMethodScreen extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Masuk dengan Gmail',
+                    'Daftar dengan Gmail',
                     style: TextStyle(
                       color: AppColors.darkBackground,
                       fontWeight: FontWeight.bold,
@@ -111,13 +111,16 @@ class LoginMethodScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // KE REGISTER
+              // KE LOGIN
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.registerMethod);
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.loginMethod,
+                  );
                 },
                 child: const Text(
-                  'Belum punya akun? Daftar di sini',
+                  'Sudah punya akun? Masuk di sini',
                   style: TextStyle(
                     color: AppColors.greyText,
                     fontWeight: FontWeight.bold,
