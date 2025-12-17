@@ -8,7 +8,11 @@ import 'package:tekber7/providers/review_provider.dart';
 
 import 'routes/app_routes.dart';
 
-// Import screen tidak perlu ditulis disini lagi karena sudah diurus oleh app_routes.dart
+import 'package:tekber7/screens/password/change_password_screen.dart';
+import 'package:tekber7/screens/home/profile_screen.dart';
+import 'package:tekber7/screens/home/change_profile_screen.dart';
+
+import 'package:tekber7/screens/password/forget_password_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,8 +56,18 @@ class MyApp extends StatelessWidget {
       // Mulai dari halaman Welcome (Punya teman)
       initialRoute: AppRoutes.welcome,
       
-      // Ambil daftar rute dari file app_routes.dart yang baru kita perbaiki
-      routes: AppRoutes.getRoutes(),
+      // --- TEKNIK PENGGABUNGAN RUTE (FUSION!) ---
+      routes: {
+        // 1. Ambil semua rute punya temen (Welcome, Login, Home, dll)
+        ...AppRoutes.getRoutes(),
+
+        // Daftarkan TempLoadingScreen di sini sebagai route tambahan
+        '/temp-login': (context) => const TempLoadingScreen(),
+        '/change-password': (context) => const ChangePasswordScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/forget-password': (context) => const ResetPasswordFlow(),
+        '/change-profile': (context) => const ChangeProfileScreen(),
+      },
     );
   }
 }
