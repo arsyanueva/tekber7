@@ -84,16 +84,23 @@ class BookingService {
   }
   
   // --- Ambil Booking User ---
-  Future<List<BookingModel>> getUserBookings() async {
+  // --- UPDATE: Ambil List Booking + Data Lapangan ---
+  Future<List<Map<String, dynamic>>> getUserBookings() async {
     try {
       final userId = _supabase.auth.currentUser!.id;
+      
+      // Kita pake .select('*, fields(*)') buat JOIN ke tabel fields
+      // Syarat: Di Supabase, kolom 'field_id' di tabel bookings harus punya Foreign Key ke tabel 'fields'
       final response = await _supabase
           .from('bookings')
-          .select()
+          .select('*, fields(name, image_url, address)') 
           .eq('renter_id', userId)
           .order('booking_date', ascending: false); 
-      return (response as List).map((e) => BookingModel.fromJson(e)).toList();
+
+      // Kita balikin bentuk List<Map> aja biar fleksibel ngambil data field-nya
+      return List<Map<String, dynamic>>.from(response);
     } catch (e) {
+      print("Error Get Bookings: $e");
       return [];
     }
   }
