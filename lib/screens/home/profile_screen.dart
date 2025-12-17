@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tekber7/screens/home/change_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -121,12 +122,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // ================= MENU =================
               _menuButton(
-                icon: Icons.person_outline,
-                title: "Ubah Profil",
-                onTap: () {
-                   // Todo: Navigasi ke edit profil
-                },
-              ),
+              icon: Icons.person_outline,
+              title: "Ubah Profil",
+              onTap: () {
+                // --- TEMPEL KODENYA DI SINI ---
+                Navigator.pushNamed(context, '/change-profile').then((result) {
+                  // Jika kembali membawa data 'true' (berhasil update), refresh data
+                  if (result == true) {
+                    _getProfileData();
+                  }
+                });
+              },
+            ),
               _menuButton(
                 icon: Icons.lock_outline,
                 title: "Ganti Password",

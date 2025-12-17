@@ -30,8 +30,8 @@ class _TempLoadingScreenState extends State<TempLoadingScreen> {
     // 2. Coba Login
     try {
       await supabase.auth.signInWithPassword(
-        email: 'test@admin.com', 
-        password: 'admin123',
+        email: 'achavolunvibes@gmail.com', 
+        password: 'acha123',
       );
 
       if (mounted) {
