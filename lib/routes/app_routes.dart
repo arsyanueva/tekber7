@@ -10,6 +10,9 @@ import 'package:tekber7/screens/auth/register_email_screen.dart';
 import 'package:tekber7/screens/auth/login_email_screen.dart';
 import 'package:tekber7/screens/auth/role_selection_screen.dart';
 import 'package:tekber7/screens/auth/verify_otp_screen.dart';
+import 'package:tekber7/screens/home/home_owner_screen.dart';
+import 'package:tekber7/screens/home/add_field_screen.dart';
+
 
 class AppRoutes {
   // Definisi nama route
@@ -24,6 +27,8 @@ class AppRoutes {
   static const String loginEmail = '/login-email';
   static const String roleSelection = '/role-selection';
   static const String verifyOtp = '/verify-otp';
+  static const String homeOwner = '/home-owner';
+  static const String addField = '/add-field';
 
   // Map route ke Widget
   static Map<String, WidgetBuilder> getRoutes() {
@@ -35,6 +40,8 @@ class AppRoutes {
       loginEmail: (context) => const LoginEmailScreen(),
       roleSelection: (context) => const RoleSelectionScreen(),
       verifyOtp: (context) => const VerifyOtpScreen(),
+      homeOwner: (context) => const HomeOwnerScreen(),
+      addField: (context) => const AddFieldScreen(),
       // Route khusus untuk Add Review dengan Arguments
       addReview: (context) {
         // 1. Ambil data args dan cast sebagai Map

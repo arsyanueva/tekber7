@@ -1,3 +1,5 @@
+// Rian Chairul Ichsan (5026231121)
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tekber7/services/auth_service.dart';
@@ -20,19 +22,32 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
   Future<void> _login() async {
     setState(() => _isLoading = true);
     try {
+      // 1. Proses Login ke Supabase Auth
       await _authService.signInWithEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
+      // 2. Ambil Data Profile untuk Cek Role
+      final userProfile = await _authService.getUserProfile();
+      
+      // Ambil role, default ke 'renter' jika null
+      final role = userProfile?['role'] ?? 'renter'; 
+
       if (mounted) {
-        // Navigasi ke Home dan hapus semua route sebelumnya
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        // 3. Navigasi Berdasarkan Role
+        if (role == 'owner') {
+          // Jika Owner, ke Home Owner
+          Navigator.pushNamedAndRemoveUntil(context, '/home-owner', (route) => false);
+        } else {
+          // Jika Renter (atau lainnya), ke Home Biasa
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        }
       }
     } on AuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message), backgroundColor: Colors.red));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Login Gagal"), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Login Gagal, periksa koneksi anda"), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

@@ -14,9 +14,7 @@ class VerifyOtpScreen extends StatefulWidget {
 }
 
 class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
-  // --- [FIX] SUDAH DIUBAH KE 8 DIGIT ---
   final int _otpLength = 8; 
-  // -------------------------------------
 
   late List<TextEditingController> _controllers;
   late List<FocusNode> _focusNodes;
@@ -81,13 +79,27 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
     String otp = _controllers.map((e) => e.text).join();
 
     try {
+      // 1. Verifikasi OTP ke Supabase
       await _authService.verifyOtp(email: _email, token: otp);
+
+      // 2. Ambil Data Profile untuk Cek Role
+      // Karena user baru saja terverifikasi, kita cek dia daftar sebagai apa
+      final userProfile = await _authService.getUserProfile();
+      final role = userProfile?['role'] ?? 'renter'; // Default ke renter
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Verifikasi Berhasil!')),
         );
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+
+        // 3. Navigasi Berdasarkan Role
+        if (role == 'owner') {
+          // Arahkan Owner ke Home Owner
+          Navigator.pushNamedAndRemoveUntil(context, '/home-owner', (route) => false);
+        } else {
+          // Arahkan Penyewa ke Home Biasa
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        }
       }
     } on AuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message), backgroundColor: Colors.red));

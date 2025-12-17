@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: CircleAvatar(
                       radius: 48,
                       // Jika nanti ada URL avatar, pakai NetworkImage
-                      backgroundImage: const AssetImage("assets/profile_dummy.jpg"),
+                      backgroundImage: const AssetImage("assets/profile_dummy.png"),
                       // backgroundColor: Colors.grey, // Opsi jika gambar gagal load
                     ),
                   ),
