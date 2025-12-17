@@ -6,6 +6,7 @@ import 'package:tekber7/widgets/field_card.dart';
 import 'package:tekber7/screens/booking/booking_history_screen.dart';
 import 'package:tekber7/services/auth_service.dart';
 import 'field_detail_screen.dart'; 
+import 'package:tekber7/screens/home/profile_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -108,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       const Center(child: Text('Halaman Lapangan')),
       const BookingHistoryScreen(),
-      const Center(child: Text('Halaman Profil')),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
