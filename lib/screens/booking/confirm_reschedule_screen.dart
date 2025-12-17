@@ -24,9 +24,9 @@ class ConfirmRescheduleScreen extends StatefulWidget {
 class _ConfirmRescheduleScreenState extends State<ConfirmRescheduleScreen> {
   bool _isLoading = false;
   final BookingService _bookingService = BookingService(); // Panggil Service
-  final DateTime _selectedDate = DateTime.now().add(const Duration(days: 1)); 
-  final String _selectedStartTime = "08:00"; 
-  final String _selectedEndTime = "09:00";
+  DateTime _selectedDate = DateTime.now().add(const Duration(days: 1)); 
+  String _selectedStartTime = "08:00"; 
+  String _selectedEndTime = "09:00";
 
   // Helper format tanggal (Sekarang pakai intl biar rapi)
   String _formatDate(DateTime date) {
