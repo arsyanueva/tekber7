@@ -4,6 +4,17 @@ import 'package:tekber7/utils/app_colors.dart';
 class LoginMethodScreen extends StatelessWidget {
   const LoginMethodScreen({super.key});
 
+  void _goToIdentityInput(BuildContext context, String method) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.identityInput,
+      arguments: {
+        'flowType': 'login',
+        'method': method,
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +32,7 @@ class LoginMethodScreen extends StatelessWidget {
                 'assets/images/loginmethod.png', 
                 height: 250, 
               ),
-              
+
               const SizedBox(height: 30),
 
               // 2. JUDUL BESAR
@@ -39,7 +50,7 @@ class LoginMethodScreen extends StatelessWidget {
 
               // 3. SUBTITLE
               const Text(
-                'Pilih dan pesan lapangan olahraga sesuai kebutuhan kamu.',
+                'Pilih metode login untuk melanjutkan.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
