@@ -3,6 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tekber7/utils/app_colors.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
 
 class AddFieldScreen extends StatefulWidget {
   const AddFieldScreen({super.key});
@@ -19,6 +23,11 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
   // Harga default / Pilihan
   int _selectedPrice = 100000;
   final List<int> _priceOptions = [100000, 150000, 200000, 250000, 300000];
+
+  // Untuk Foto
+  final ImagePicker _picker = ImagePicker();
+  List<String> _photoUrls = [];
+  bool _isUploadingPhoto = false;
 
   bool _isLoading = false;
 
@@ -40,13 +49,19 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
         'address': _addressController.text.trim(),
         'price_per_hour': _selectedPrice, // Simpan sebagai integer/numeric
         'owner_id': user.id,
-        // Default Image sementara (karena belum setup Storage upload)
-        'image_url': 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&q=80&w=800', 
+        'image_url': _photoUrls, 
         'rating': 0.0,
         'facilities': 'Wifi,Parkir,Toilet', // Default dummy facilities
         'latitude': -7.2575, // Default Surabaya (Nanti bisa pakai Maps Picker)
         'longitude': 112.7521,
       });
+
+      if (_photoUrls.length < 3) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Minimal upload 3 foto lapangan")),
+        );
+        return;
+      }
 
       if (mounted) {
         // Tampilkan Dialog Sukses (Mirip image_77e69d.png)
@@ -58,6 +73,59 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
+
+  Future<void> _uploadPhotos() async {
+    final images = await _picker.pickMultiImage(imageQuality: 75);
+    if (images.isEmpty) return;
+
+    setState(() => _isUploadingPhoto = true);
+
+    try {
+      for (final image in images) {
+        final fileExt = image.name.split('.').last;
+        final fileName = '${const Uuid().v4()}.$fileExt';
+        final filePath = 'fields/$fileName';
+
+        if (kIsWeb) {
+          // FLUTTER WEB
+          Uint8List bytes = await image.readAsBytes();
+
+          await Supabase.instance.client.storage
+              .from('field-images')
+              .uploadBinary(
+                filePath,
+                bytes,
+                fileOptions:  FileOptions(
+                  contentType: 'image/$fileExt',
+                ),
+              );
+        } else {
+          // ANDROID / IOS
+          await Supabase.instance.client.storage
+              .from('field-images')
+              .upload(
+                filePath,
+                File(image.path),
+              );
+        }
+
+        final publicUrl = Supabase.instance.client.storage
+            .from('field-images')
+            .getPublicUrl(filePath);
+
+        _photoUrls.add(publicUrl);
+      }
+
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Upload gagal: $e")),
+      );
+    } finally {
+      setState(() => _isUploadingPhoto = false);
+    }
+  }
+
 
   void _showSuccessDialog() {
     showDialog(
@@ -139,7 +207,7 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
               _buildTextField(
                 controller: _addressController, 
                 hint: "Lokasi / Alamat",
-                 validator: (val) => val!.isEmpty ? "Alamat wajib diisi" : null,
+                validator: (val) => val!.isEmpty ? "Alamat wajib diisi" : null,
               ),
               const SizedBox(height: 24),
 
@@ -176,13 +244,13 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
 
               const SizedBox(height: 24),
 
-              // 4. Upload Foto (Dummy UI)
+              // 4. Upload Foto
               const Text("Foto Lapangan (minimal 3)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerLeft,
                 child: ElevatedButton.icon(
-                  onPressed: () {}, // Belum ada fungsi upload real
+                  onPressed: _isUploadingPhoto ? null : _uploadPhotos,
                   icon: const Icon(Icons.upload, size: 18),
                   label: const Text("Upload"),
                   style: ElevatedButton.styleFrom(
@@ -193,16 +261,36 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Placeholder Kotak Gambar
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(Icons.image, size: 50, color: Colors.white),
-              ),
+              // Kotak Gambar
+              _photoUrls.isEmpty
+                ? Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.image, size: 50, color: Colors.white),
+                  )
+                : GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _photoUrls.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemBuilder: (context, index) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          _photoUrls[index],
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  ),
 
               const SizedBox(height: 40),
 
