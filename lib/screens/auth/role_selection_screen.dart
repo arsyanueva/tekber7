@@ -1,58 +1,61 @@
+// Rian Chairul Ichsan (5026231121)
+
 import 'package:flutter/material.dart';
-import '../../routes/app_routes.dart';
+import 'package:tekber7/utils/app_colors.dart'; // Pastikan file warna ada
 
 class RoleSelectionScreen extends StatefulWidget {
-  final String flowType;
-  final String method;
-
-  const RoleSelectionScreen({
-    super.key,
-    required this.flowType,
-    required this.method,
-  });
+  const RoleSelectionScreen({super.key});
 
   @override
   State<RoleSelectionScreen> createState() => _RoleSelectionScreenState();
 }
 
 class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
-  String? role; // 'pemilik' | 'peminjam'
+  // Default value untuk database: 'renter' atau 'owner'
+  String _selectedRoleValue = 'renter'; 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: Colors.white,
-        leading: const BackButton(color: Colors.black),
-        title: const Text(
-          'Daftar Sebagai',
-          style: TextStyle(color: Colors.black),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
+            // 1. TEKS DIPERBESAR
+            const Text(
+              "Daftar Sebagai",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold), 
+            ),
+            const SizedBox(height: 30),
 
             Row(
               children: [
+                // KARTU 1: PENGELOLA (OWNER)
                 Expanded(
-                  child: _roleCard(
-                    title: 'Pengelola',
-                    asset: 'assets/pemilik.png',
-                    value: 'owner',
+                  child: _buildRoleCard(
+                    label: 'Pengelola',
+                    imagePath: 'assets/images/owner.png', 
+                    value: 'owner', 
                   ),
                 ),
                 const SizedBox(width: 16),
+                
+                // KARTU 2: PENYEWA (RENTER)
                 Expanded(
-                  child: _roleCard(
-                    title: 'Penyewa',
-                    asset: 'assets/peminjam.png',
-                    value: 'renter',
+                  child: _buildRoleCard(
+                    label: 'Penyewa',
+                    imagePath: 'assets/images/renter.png', 
+                    value: 'renter', 
                   ),
                 ),
               ],
@@ -60,80 +63,68 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
             const Spacer(),
 
+            // 3. TOMBOL DIPERBESAR
             SizedBox(
               width: double.infinity,
-              height: 52,
+              height: 60, // Tinggi ditambah (50 -> 60)
               child: ElevatedButton(
-                onPressed: role == null
-                    ? null
-                    : () {
-                        Navigator.pushNamed(
-                          context,
-                          AppRoutes.identityInput,
-                          arguments: {
-                            'flowType': widget.flowType,
-                            'method': widget.method,
-                            'role': role,
-                          },
-                        );
-                      },
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context, 
+                    '/register-email', 
+                    arguments: _selectedRoleValue 
+                  );
+                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E1B2E),
-                  disabledBackgroundColor: Colors.grey.shade300,
+                  backgroundColor: AppColors.darkBackground,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12), // Radius diperhalus sedikit
                   ),
                 ),
                 child: const Text(
-                  'Daftar',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  "Daftar", 
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18) // Font tombol diperbesar
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  Widget _roleCard({
-    required String title,
-    required String asset,
-    required String value,
-  }) {
-    final bool isSelected = role == value;
+  Widget _buildRoleCard({required String label, required String imagePath, required String value}) {
+    final bool isSelected = _selectedRoleValue == value;
 
     return GestureDetector(
-      onTap: () => setState(() => role = value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+      onTap: () {
+        setState(() {
+          _selectedRoleValue = value;
+        });
+      },
+      child: Container(
         height: 180,
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF1E1B2E)
-              : const Color(0xFFEDEDED),
+          // 2. LOGIKA WARNA BACKGROUND: Hitam jika dipilih, Abu-abu jika tidak
+          color: isSelected ? AppColors.darkBackground : const Color(0xFFEFEFEF),
           borderRadius: BorderRadius.circular(16),
+          border: isSelected 
+              ? Border.all(color: AppColors.darkBackground, width: 2) 
+              : Border.all(color: Colors.transparent),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              asset,
-              height: 90,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 12),
+            Image.asset(imagePath, height: 80),
+            const SizedBox(height: 16),
             Text(
-              title,
+              label,
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                // Ubah warna teks jadi Putih jika background Hitam (Selected)
+                color: isSelected ? Colors.white : Colors.grey[700],
               ),
             ),
           ],

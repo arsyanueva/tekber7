@@ -6,12 +6,17 @@ import '../screens/auth/role_selection_screen.dart';
 import '../screens/auth/identity_input_screen.dart';
 import '../screens/auth/otp_verification_screen.dart';
 import '../screens/home/home_screen.dart';
-// Pastikan file-file ini sudah ada di folder booking
 import '../screens/booking/cancel_booking_screen.dart';
 import '../screens/booking/reschedule_booking_screen.dart';
-// Pastikan file-file ini sudah ada di folder review
 import '../screens/review/reply_review_screen.dart';
 import '../screens/review/review_form_screen.dart';
+import 'package:tekber7/screens/auth/register_email_screen.dart';
+import 'package:tekber7/screens/auth/login_email_screen.dart';
+import 'package:tekber7/screens/auth/role_selection_screen.dart';
+import 'package:tekber7/screens/auth/verify_otp_screen.dart';
+import 'package:tekber7/screens/home/home_owner_screen.dart';
+import 'package:tekber7/screens/home/add_field_screen.dart';
+
 
 class AppRoutes {
   // Definisi nama route
@@ -26,6 +31,12 @@ class AppRoutes {
   static const String cancelBooking = '/cancel-booking';
   static const String rescheduleBooking = '/reschedule-booking';
   static const String replyReview = '/reply-review';
+  static const String registerEmail = '/register-email';
+  static const String loginEmail = '/login-email';
+  static const String roleSelection = '/role-selection';
+  static const String verifyOtp = '/verify-otp';
+  static const String homeOwner = '/home-owner';
+  static const String addField = '/add-field';
 
   // Map route ke Widget
   static Map<String, WidgetBuilder> getRoutes() {
@@ -34,7 +45,12 @@ class AppRoutes {
       loginMethod: (context) => const LoginMethodScreen(),
       registerMethod: (context) => const RegisterMethodScreen(),
       home: (context) => const HomeScreen(),
-      
+      registerEmail: (context) => const RegisterEmailScreen(),
+      loginEmail: (context) => const LoginEmailScreen(),
+      roleSelection: (context) => const RoleSelectionScreen(),
+      verifyOtp: (context) => const VerifyOtpScreen(),
+      homeOwner: (context) => const HomeOwnerScreen(),
+      addField: (context) => const AddFieldScreen(),
       // Route khusus untuk Add Review dengan Arguments
       addReview: (context) {
         // 1. Ambil data args dan cast sebagai Map

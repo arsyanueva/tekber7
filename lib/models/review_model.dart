@@ -11,7 +11,7 @@ class ReviewModel {
   final DateTime? createdAt;
 
   ReviewModel({
-    this.id,
+    this.id, 
     required this.bookingId,
     required this.fieldId,
     required this.renterId,
@@ -26,6 +26,7 @@ class ReviewModel {
   // Konversi data ke JSON untuk dikirim ke Supabase (Create Review)
   Map<String, dynamic> toJson() {
     return {
+      // ID jangan dikirim saat insert
       'booking_id': bookingId,
       'field_id': fieldId,
       'renter_id': renterId,
