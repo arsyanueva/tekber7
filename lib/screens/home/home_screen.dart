@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tekber7/screens/home/field_detail_screen.dart';
+import 'package:tekber7/services/auth_service.dart';
 import '../../models/field_model.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/field_card.dart';
