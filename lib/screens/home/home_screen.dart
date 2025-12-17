@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+<<<<<<< Updated upstream
 import '../../models/field_model.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/field_card.dart';
+=======
+import 'package:tekber7/models/field_model.dart';
+import 'package:tekber7/utils/app_colors.dart';
+import 'package:tekber7/widgets/field_card.dart';
+import 'package:tekber7/screens/booking/booking_history_screen.dart';
+import 'package:tekber7/services/auth_service.dart';
+import 'field_detail_screen.dart'; 
+import 'package:tekber7/screens/home/profile_screen.dart';
+
+>>>>>>> Stashed changes
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,6 +54,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< Updated upstream
+=======
+    final List<Widget> pages = [
+      HomeContent(
+        fields: fields, 
+        isLoading: isLoading, 
+        userName: userName,
+        selectedFilter: _selectedFilter,
+        onFilterChanged: _onFilterChanged,
+      ),
+      const Center(child: Text('Halaman Lapangan')),
+      const BookingHistoryScreen(),
+      const ProfileScreen(),
+    ];
+
+>>>>>>> Stashed changes
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5), // Background abu muda
       
