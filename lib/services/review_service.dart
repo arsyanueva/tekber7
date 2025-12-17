@@ -4,15 +4,14 @@ import 'package:tekber7/models/review_model.dart';
 class ReviewService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // 1. Method untuk POST review (Digunakan oleh Provider & Screen)
   Future<void> submitReview(ReviewModel review) async {
+    // Insert ke database menggunakan toJson
     await _supabase.from('reviews').insert(review.toJson());
   }
 
-  // 2. Method postReview (Alias untuk submitReview agar cocok dengan Provider Anda)
   Future<void> postReview(String bookingId, String fieldId, int rating, String comment) async {
     final user = _supabase.auth.currentUser;
-    final userId = user?.id ?? 'dummy-user-id'; // Handle null user
+    final userId = user?.id ?? 'dummy-user-id';
 
     final review = ReviewModel(
       bookingId: bookingId,
@@ -20,14 +19,15 @@ class ReviewService {
       renterId: userId,
       rating: rating,
       comment: comment,
+      // createdAt otomatis diisi oleh Model
     );
     
     await submitReview(review);
   }
 
-  // 3. Method getReviewsByField (Dicari oleh Provider)
   Future<List<ReviewModel>> getReviewsByField(String fieldId) async {
     try {
+      // Query dengan JOIN ke tabel users untuk ambil nama & foto
       final response = await _supabase
           .from('reviews')
           .select('*, users(name, profile_picture)') 
@@ -41,7 +41,6 @@ class ReviewService {
     }
   }
 
-  // 4. Method replyReview (Dicari oleh Provider)
   Future<void> replyReview(String reviewId, String reply) async {
     await _supabase
         .from('reviews')

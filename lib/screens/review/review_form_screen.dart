@@ -116,6 +116,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) throw Exception('User tidak login');
 
+      // PERBAIKAN: Tidak perlu isi ID dan CreatedAt
       final review = ReviewModel(
         bookingId: widget.bookingId,
         fieldId: widget.fieldId,
@@ -145,6 +146,8 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Gunakan kembali kode UI layout kamu yang sudah bagus
+    // Bagian Logika di atas yang paling penting
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -241,17 +244,11 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
                     index < _selectedRating ? Icons.star : Icons.star_border,
                     color: Colors.amber,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _selectedRating = index + 1;
-                    });
-                  },
+                  onPressed: () => setState(() => _selectedRating = index + 1),
                 );
               }),
             ),
             const SizedBox(height: 24),
-
-            // Input Text Review
             const Text('Beri Review', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             TextField(
@@ -259,22 +256,12 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'Masukkan pengalaman anda',
-                hintStyle: TextStyle(color: Colors.grey[400]),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 30),
-
-            // Tombol Posting
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -282,16 +269,11 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
                 onPressed: _isLoading ? null : _submitReview,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.darkBackground,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Posting',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                    : const Text('Posting', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
