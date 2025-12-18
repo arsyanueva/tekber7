@@ -18,7 +18,6 @@ class ConfirmCancelScreen extends StatefulWidget {
 class _ConfirmCancelScreenState extends State<ConfirmCancelScreen> {
   bool _isLoading = false;
 
-  // Logika dinamis untuk Status Kebijakan
   String _getPolicyStatus(int percentage) {
     if (percentage == 100) return "Refund Penuh";
     if (percentage > 0) return "Refund Sebagian";
@@ -38,7 +37,6 @@ class _ConfirmCancelScreenState extends State<ConfirmCancelScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFFFFC700)),
           onPressed: () => Navigator.pop(context),
         ),
-        // --- HEADER MENGIKUTI FORMAT DETAIL PESANAN ---
         title: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -53,7 +51,6 @@ class _ConfirmCancelScreenState extends State<ConfirmCancelScreen> {
       ),
       body: Column(
         children: [
-          // HEADER KUNING (LAYOUT AWAL TANPA ICON DI TENGAH)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -81,7 +78,6 @@ class _ConfirmCancelScreenState extends State<ConfirmCancelScreen> {
                 const SizedBox(height: 20),
                 const Text("Alasan Pembatalan:", style: TextStyle(color: Colors.black54, fontSize: 12)),
                 const SizedBox(height: 4),
-                // TEKS ALASAN TETAP CENTER
                 Text(
                   widget.reason, 
                   textAlign: TextAlign.center,
@@ -91,7 +87,6 @@ class _ConfirmCancelScreenState extends State<ConfirmCancelScreen> {
             ),
           ),
 
-          // RINCIAN REFUND
           Padding(
             padding: const EdgeInsets.all(20),
             child: Container(
@@ -111,7 +106,6 @@ class _ConfirmCancelScreenState extends State<ConfirmCancelScreen> {
                     ],
                   ),
                   const Divider(height: 25),
-                  // STATUS KEBIJAKAN MENYESUAIKAN PERSENTASE
                   _refundRow("Status Kebijakan", _getPolicyStatus(refund.refundPercentage)),
                   _refundRow("Persentase Kembali", "${refund.refundPercentage}%", valueColor: Colors.blue),
                   const Divider(),

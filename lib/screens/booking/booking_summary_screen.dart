@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
+import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'package:tekber7/models/booking_model.dart';
 import 'payment_confirmation_screen.dart';
 
@@ -32,7 +32,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   late BookingModel _draftBooking; 
   String _selectedPaymentMethod = "Pilih Metode Pembayaran";
   
-  // DATA USER DINAMIS
   String userName = "Loading...";
   String userPhone = "-";
   bool isLoadingUser = true;
@@ -40,13 +39,12 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserData(); // Ambil data user pas layar dibuka
+    _fetchUserData(); 
     
-    // Setup Model Booking
     _draftBooking = BookingModel(
       id: "booking-${DateTime.now().millisecondsSinceEpoch}",
       fieldId: widget.fieldId,
-      renterId: Supabase.instance.client.auth.currentUser?.id ?? "unknown", // Pake ID Asli
+      renterId: Supabase.instance.client.auth.currentUser?.id ?? "unknown", 
       bookingDate: widget.selectedDate,
       startTime: widget.selectedTime.split(" - ")[0], 
       endTime: widget.selectedTime.split(" - ")[1],   
@@ -57,14 +55,12 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  // --- FUNGSI AMBIL DATA USER ---
   Future<void> _fetchUserData() async {
     try {
       final supabase = Supabase.instance.client;
       final user = supabase.auth.currentUser;
 
       if (user != null) {
-        // Ambil data detail dari tabel 'users' berdasarkan ID auth
         final data = await supabase
             .from('users')
             .select('name, phone_number')
@@ -74,7 +70,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
         if (mounted) {
           setState(() {
             userName = data['name'] ?? "User Tanpa Nama";
-            userPhone = data['phone_number'] ?? user.email ?? "-"; // Fallback ke email kalo hp kosong
+            userPhone = data['phone_number'] ?? user.email ?? "-"; 
             isLoadingUser = false;
           });
         }
@@ -111,13 +107,12 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. DATA PESANAN
                   _buildSectionLabel("Data Pesanan", "Ringkasan pesanan lapangan anda"),
                   _buildCard(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded( // Pake Expanded biar teks panjang gak overflow
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -134,7 +129,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // 2. PEMESAN (DINAMIS SEKARANG! 😎)
                   _buildSectionLabel("Pemesan", "E-tiket akan dikirim ke kontak ini"),
                   _buildCard(
                     child: isLoadingUser 
@@ -150,14 +144,11 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                                 Text(userPhone, style: const TextStyle(color: Colors.grey)),
                               ],
                             ),
-                            // Tombol ubah dimatiin dulu, karena ngubah profil itu fitur lain
-                            // _buildUbahButton(() {}), 
                           ],
                         ),
                   ),
                   const SizedBox(height: 20),
 
-                  // 3. PEMBAYARAN (Selector)
                   _buildSectionLabel("Pembayaran", "Pilih metode pembayaran"),
                   _buildCard(
                     child: Row(
@@ -191,7 +182,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
             ),
           ),
           
-          // BOTTOM BAR (TOTAL & TOMBOL BAYAR)
           Container(
             padding: const EdgeInsets.all(20),
             color: Colors.white,
@@ -210,7 +200,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E1E1E), // Hitam
+                      backgroundColor: const Color(0xFF1E1E1E), 
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     onPressed: () {
@@ -241,7 +231,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  // --- WIDGET HELPER ---
   Widget _buildSectionLabel(String title, String subtitle) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -278,7 +267,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  // --- LOGIC PILIH PEMBAYARAN (SAMA AJA KAYAK KEMARIN) ---
   void _showPaymentSelector() {
     showModalBottomSheet(
       context: context,

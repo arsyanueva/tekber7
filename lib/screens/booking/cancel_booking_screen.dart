@@ -1,4 +1,3 @@
-// File: lib/screens/booking/cancel_booking_screen.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/models/booking_model.dart';
@@ -20,7 +19,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E1E), // Header Gelap sesuai Detail Pesanan
+        backgroundColor: const Color(0xFF1E1E1E), 
         elevation: 0,
         centerTitle: true,
         leading: IconButton(

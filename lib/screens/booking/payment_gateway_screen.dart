@@ -7,15 +7,15 @@ import 'payment_success_screen.dart';
 class PaymentGatewayScreen extends StatefulWidget {
   final BookingModel booking;
   final String paymentMethod;
-  final String imagePath; // Logo yang dikirim dari halaman sebelumnya
-  final Color themeColor; // Warna tema (misal Dana=Biru, OVO=Ungu)
+  final String imagePath; 
+  final Color themeColor; 
 
   const PaymentGatewayScreen({
     super.key,
     required this.booking,
     required this.paymentMethod,
     required this.imagePath,
-    this.themeColor = Colors.blue, // Default
+    this.themeColor = Colors.blue, 
   });
 
   @override
@@ -28,7 +28,6 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
   bool _isLoading = false;
 
   Future<void> _processPayment() async {
-    // Validasi PIN
     if (_pinController.text.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("PIN harus 6 digit!"), backgroundColor: Colors.red));
       return;
@@ -36,16 +35,12 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
 
     setState(() => _isLoading = true);
 
-    // Simulasi Loading Bank...
     await Future.delayed(const Duration(seconds: 2));
 
     try {
-      // --- PERBAIKAN DI SINI ---
-      // Jangan pakai update, tapi pakai createBooking (Insert)
       await _bookingService.createBooking(widget.booking);
 
       if (mounted) {
-        // Redirect ke Success Screen
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => PaymentSuccessScreen(booking: widget.booking)),
@@ -54,7 +49,6 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
       }
     } catch (e) {
       if (mounted) {
-        // Tampilkan error asli biar tau salahnya dimana
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Gagal: $e"), backgroundColor: Colors.red)
         );
@@ -83,7 +77,6 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            // Logo Pembayaran Besar
             Container(
               width: 100, height: 100,
               padding: const EdgeInsets.all(20),
@@ -102,18 +95,17 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
 
             const SizedBox(height: 50),
             
-            // Input PIN
             const Text("Masukkan PIN Keamanan", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
             TextField(
               controller: _pinController,
               keyboardType: TextInputType.number,
-              obscureText: true, // Biar jadi bintang-bintang ******
+              obscureText: true,
               maxLength: 6,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 24, letterSpacing: 8, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
-                counterText: "", // Ilangin counter 0/6
+                counterText: "",
                 filled: true,
                 fillColor: Colors.grey.shade100,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -123,12 +115,11 @@ class _PaymentGatewayScreenState extends State<PaymentGatewayScreen> {
 
             const Spacer(),
 
-            // Tombol Bayar
             SizedBox(
               width: double.infinity, height: 55,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: widget.themeColor, // Warna tombol ngikutin brand (Dana=Biru, OVO=Ungu)
+                  backgroundColor: widget.themeColor, 
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),

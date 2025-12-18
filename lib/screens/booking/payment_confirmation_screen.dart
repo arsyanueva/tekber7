@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/models/booking_model.dart';
 import 'package:tekber7/services/booking_service.dart';
-import 'payment_gateway_screen.dart'; // Import halaman PIN
+import 'payment_gateway_screen.dart'; 
 
 class PaymentConfirmationScreen extends StatefulWidget {
   final BookingModel booking;
@@ -12,7 +12,7 @@ class PaymentConfirmationScreen extends StatefulWidget {
   const PaymentConfirmationScreen({
     super.key, 
     required this.booking,
-    this.fieldName = "Bhaskara Futsal Arena", // Default name
+    this.fieldName = "Bhaskara Futsal Arena",
     required this.selectedMethod,
   });
 
@@ -21,9 +21,8 @@ class PaymentConfirmationScreen extends StatefulWidget {
 }
 
 class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
-  // Logic Navigasi ke Halaman PIN (Gateway)
   void _handlePaymentSimulation() {
-    final info = _getPaymentInfo(); // Ambil info logo & warna
+    final info = _getPaymentInfo(); 
     
     Navigator.push(
       context,
@@ -31,18 +30,16 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         builder: (context) => PaymentGatewayScreen(
           booking: widget.booking,
           paymentMethod: widget.selectedMethod,
-          imagePath: info['imagePath'],         // Kirim Logo
-          themeColor: info['color'] ?? Colors.blue, // Kirim Warna Tema
+          imagePath: info['imagePath'],        
+          themeColor: info['color'] ?? Colors.blue, 
         ),
       ),
     );
   }
 
-  // --- HELPER LOGO & DATA DINAMIS ---
   Map<String, dynamic> _getPaymentInfo() {
     String method = widget.selectedMethod;
     
-    // Default Data
     String title = method;
     String account = "Menunggu Pembayaran...";
     String action = "Instruksi";
@@ -140,13 +137,11 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
-                          // Header Hitam
                           Container(
                             width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 15),
                             color: primaryBlack,
                             child: Text(widget.fieldName, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                           ),
-                          // Subheader Kuning
                           Container(
                             width: double.infinity, padding: const EdgeInsets.all(16), color: primaryYellow,
                             child: Column(
@@ -159,7 +154,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                             ),
                           ),
                           
-                          // --- INFO PEMBAYARAN DINAMIS ---
                           Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
@@ -168,7 +162,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // LOGO & NAMA METODE
                                     Row(children: [
                                       Container(
                                         width: 50, height: 35,
@@ -182,7 +175,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                                       Text(paymentInfo['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))
                                     ]),
                                     
-                                    // Tombol Ubah
                                     SizedBox(height: 28, child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: primaryYellow, padding: const EdgeInsets.symmetric(horizontal: 12), elevation: 0), onPressed: (){ Navigator.pop(context); }, child: const Text("Ubah", style: TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold))))
                                   ],
                                 ),
@@ -204,7 +196,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                     ),
                     const SizedBox(height: 20),
                     
-                    // CARD 2: RINCIAN BIAYA
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
@@ -235,7 +226,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             ),
           ),
           
-          // TOMBOL KONFIRMASI (PINDAH KE HALAMAN PIN)
           Container(
             padding: const EdgeInsets.all(20),
             color: Colors.white,

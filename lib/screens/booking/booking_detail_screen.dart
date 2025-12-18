@@ -33,7 +33,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // --- LOGIKA DINAMIS STATUS ---
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final bookingDay = DateTime(
@@ -45,12 +44,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     String displayStatus = widget.booking.status;
     bool isActuallyPast = bookingDay.isBefore(today);
 
-    // Jika sudah lewat hari dan status masih confirmed, anggap COMPLETED
     if (isActuallyPast && widget.booking.status == 'confirmed') {
       displayStatus = 'completed';
     }
 
-    // Tombol aktif hanya jika belum lewat tanggalnya DAN statusnya belum cancelled/completed
     bool isActive = (widget.booking.status == 'confirmed' || widget.booking.status == 'pending') && !isActuallyPast;
 
     return Scaffold(
@@ -143,7 +140,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           ],
         ),
       ),
-      // Tombol hanya muncul jika pesanan masih aktif (belum lewat tanggalnya)
       bottomNavigationBar: isActive ? Container(
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Color(0xFFEEEEEE)))),

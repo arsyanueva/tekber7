@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Jangan lupa import ini untuk format tanggal
+import 'package:intl/intl.dart';
 
 class RescheduleSuccessScreen extends StatelessWidget {
-  // 1. Tambahkan Variabel Penampung Data
   final DateTime newDate;
   final String newStartTime;
   final String newEndTime;
@@ -13,7 +12,7 @@ class RescheduleSuccessScreen extends StatelessWidget {
     required this.newDate,
     required this.newStartTime,
     required this.newEndTime,
-    this.fieldName = "Lapangan 2", // Default value jika kosong
+    this.fieldName = "Lapangan 2",
   });
 
   final Color _primaryDark = const Color(0xFF1E1E1E);
@@ -65,7 +64,6 @@ class RescheduleSuccessScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   
-                  // --- BAGIAN INI SEKARANG DINAMIS ---
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: Column(
@@ -73,29 +71,25 @@ class RescheduleSuccessScreen extends StatelessWidget {
                         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text("Data Sewa Lapangan :", style: TextStyle(fontSize: 12, color: Colors.grey))]),
                         const SizedBox(height: 10),
                         
-                        // TANGGAL ASLI
                         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                           Text("Tanggal", style: TextStyle(color: Colors.grey)), 
                           Text(DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(newDate), style: const TextStyle(fontWeight: FontWeight.bold))
                         ]),
                         const SizedBox(height: 8),
                         
-                        // JAM ASLI
                         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                           Text("Waktu", style: TextStyle(color: Colors.grey)), 
                           Text("$newStartTime - $newEndTime", style: const TextStyle(fontWeight: FontWeight.bold))
                         ]),
                         const SizedBox(height: 8),
                         
-                        // NAMA LAPANGAN (Bisa dinamis juga kalau mau)
                         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                           Text("Nomor Lapangan", style: TextStyle(color: Colors.grey)), 
-                          Text("2", style: const TextStyle(fontWeight: FontWeight.bold)) // Biasanya nomor lapangan dpt dari backend
+                          Text("2", style: const TextStyle(fontWeight: FontWeight.bold))
                         ]),
                       ],
                     ),
                   ),
-                  // -----------------------------------
 
                   const SizedBox(height: 30),
                   Container(

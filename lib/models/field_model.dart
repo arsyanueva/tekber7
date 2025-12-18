@@ -1,4 +1,3 @@
-//Lailatul Fitaliqoh (5026231229)
 class FieldModel {
   final String id;
   final String ownerId;
@@ -42,7 +41,6 @@ class FieldModel {
       facilities: json['facilities']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       
-      // Jika gambar kosong/null, alternatif pakai gambar placeholder
       imageUrl: (json['image_url'] != null && json['image_url'].toString().isNotEmpty)
           ? json['image_url'].toString()
           : 'https://via.placeholder.com/300', 
@@ -50,7 +48,6 @@ class FieldModel {
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
       
-      // Jika null, anggap 0.0
       rating: double.tryParse(json['rating'].toString()) ?? 0.0,
     );
   }
