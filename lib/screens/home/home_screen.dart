@@ -1,3 +1,4 @@
+// Created by Lailatul Fitaliqoh (5026231229), edited by all member
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tekber7/models/field_model.dart';
@@ -19,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   
-  // State Gabungan
+  // State
   String _selectedCity = 'SBY'; 
   String _selectedFilter = 'Terdekat'; 
   String userName = 'Sobat Olahraga'; 
@@ -33,22 +34,18 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchUserProfile();
   }
 
-  // --- LOGIC FETCH DATA (GABUNGAN) ---
   Future<void> fetchFields() async {
     setState(() => isLoading = true);
     try {
-      // 1. Query Dasar
       dynamic query = Supabase.instance.client.from('fields').select();
 
-      // 2. Filter Kota
       if (_selectedCity == 'SBY') {
         query = query.ilike('address', '%Surabaya%');
       } else if (_selectedCity == 'MLG') {
         query = query.ilike('address', '%Malang%');
       }
 
-      // Limit data
-      query = query.limit(10);
+      query = query.limit(5); // Limit 5 untuk tampilan home
 
       final response = await query;
       final data = response as List<dynamic>;
@@ -56,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           fields = data.map((json) => FieldModel.fromJson(json)).toList();
-          // 3. Apply Sorting Client-Side (Dari Branch Main)
           _sortFields(); 
           isLoading = false;
         });
@@ -67,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // --- LOGIC USER PROFILE (Dari Branch Main) ---
   Future<void> fetchUserProfile() async {
     try {
       final authService = AuthService();
@@ -82,7 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // --- EVENT HANDLERS ---
   void _onFilterChanged(String newFilter) {
     setState(() {
       _selectedFilter = newFilter;
@@ -93,11 +87,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onCityChanged(String? newCity) {
     if (newCity != null) {
       setState(() => _selectedCity = newCity);
-      fetchFields(); // Refresh data saat kota berubah
+      fetchFields(); 
     }
   }
 
-  // --- SORTING LOGIC (Dari Branch Main) ---
   void _sortFields() {
     switch (_selectedFilter) {
       case 'Termurah':
@@ -111,15 +104,11 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         break;
       case 'Terdekat':
-        // Mock User Location (Surabaya Center)
         const userLat = -7.2575; 
         const userLng = 112.7521;
-        
         fields.sort((a, b) {
-          final distA = (a.latitude - userLat) * (a.latitude - userLat) + 
-                        (a.longitude - userLng) * (a.longitude - userLng);
-          final distB = (b.latitude - userLat) * (b.latitude - userLat) + 
-                        (b.longitude - userLng) * (b.longitude - userLng);
+          final distA = (a.latitude - userLat) * (a.latitude - userLat) + (a.longitude - userLng) * (a.longitude - userLng);
+          final distB = (b.latitude - userLat) * (b.latitude - userLat) + (b.longitude - userLng) * (b.longitude - userLng);
           return distA.compareTo(distB);
         });
         break;
@@ -132,13 +121,13 @@ class _HomeScreenState extends State<HomeScreen> {
       HomeContent(
         fields: fields, 
         isLoading: isLoading,
-        userName: userName, // Pass username
+        userName: userName,
         selectedFilter: _selectedFilter,
-        selectedCity: _selectedCity, // Pass selectedCity
+        selectedCity: _selectedCity,
         onFilterChanged: _onFilterChanged,
-        onCityChanged: _onCityChanged, // Pass handler city
+        onCityChanged: _onCityChanged,
       ),
-      AllFieldsScreen(initialCity: _selectedCity, initialFilter: 'Terdekat'), // Placeholder Tab 2
+      AllFieldsScreen(initialCity: _selectedCity, initialFilter: 'Terdekat'),
       const BookingHistoryScreen(),
       const ProfileScreen(),
     ];
@@ -163,7 +152,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- WIDGET KONTEN BERANDA (GABUNGAN UI) ---
 class HomeContent extends StatelessWidget {
   final List<FieldModel> fields;
   final bool isLoading;
@@ -190,7 +178,6 @@ class HomeContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. HEADER HITAM (Gabungan Profil & Search)
           Container(
             padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
             decoration: const BoxDecoration(
@@ -200,7 +187,6 @@ class HomeContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Avatar & Nama (Dari Main)
                 Row(children: [
                   const CircleAvatar(radius: 20, backgroundImage: NetworkImage('https://i.pravatar.cc/100')),
                   const SizedBox(width: 12),
@@ -208,33 +194,44 @@ class HomeContent extends StatelessWidget {
                   const Spacer(),
                   const Icon(Icons.notifications_outlined, color: Colors.white),
                 ]),
-                
                 const SizedBox(height: 24),
                 const Text('Mau sewa lapangan\ndimana ?', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
-
-                // Search Bar & City Dropdown (Dari Lailatul)
+                
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
+                        textInputAction: TextInputAction.search, // Ubah tombol keyboard jadi 'Search'
+                        onSubmitted: (value) {
+                          if (value.trim().isNotEmpty) {
+                            // Pindah halaman bawa data search dan kota
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AllFieldsScreen(
+                                  initialCity: selectedCity, // Bawa filter kota yang sedang aktif
+                                  initialFilter: selectedFilter,
+                                  initialSearch: value, // Bawa kata kunci pencarian
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        // -----------------------------
                         decoration: InputDecoration(
                           hintText: 'Cari Lapangan di ${selectedCity == "SBY" ? "Surabaya" : "Malang"}',
                           hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
                           prefixIcon: const Icon(Icons.search, color: Colors.grey),
                           filled: true,
-                          fillColor: const Color(0xFF2B2930), 
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
+                          fillColor: const Color(0xFF2B2930),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                           contentPadding: const EdgeInsets.symmetric(vertical: 0),
                         ),
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Dropdown Kota
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(color: const Color(0xFF2B2930), borderRadius: BorderRadius.circular(12)),
@@ -257,8 +254,7 @@ class HomeContent extends StatelessWidget {
               ],
             ),
           ),
-
-          // 2. FILTER CHIPS
+          
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: SingleChildScrollView(
@@ -272,8 +268,6 @@ class HomeContent extends StatelessWidget {
               ),
             ),
           ),
-
-          // 3. JUDUL REKOMENDASI & LIST
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Row(
@@ -282,7 +276,6 @@ class HomeContent extends StatelessWidget {
                 const Text('Rekomendasi untuk kamu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 GestureDetector(
                   onTap: () {
-                    // Navigasi ke AllFields (Fitur Lailatul)
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -298,12 +291,9 @@ class HomeContent extends StatelessWidget {
               ],
             ),
           ),
-          
           const SizedBox(height: 16),
-
-          // 4. LIST LAPANGAN (Horizontal)
           SizedBox(
-            height: 260,
+            height: 280,
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : fields.isEmpty
@@ -314,19 +304,16 @@ class HomeContent extends StatelessWidget {
                         itemCount: fields.length,
                         itemBuilder: (context, index) {
                           final field = fields[index];
-                          // Navigasi Detail Lapangan (PENTING: Tetap bisa diklik)
                           return GestureDetector(
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => FieldDetailScreen(
-                                    fieldId: field.id, 
-                                  ),
+                                  builder: (context) => FieldDetailScreen(fieldId: field.id),
                                 ),
                               );
                             },
-                            child: FieldCard(field: field),
+                            child: FieldCard(field: field)
                           );
                         },
                       ),
@@ -338,7 +325,7 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildFilterChip(String label) {
-    final bool isActive = selectedFilter == label;
+    bool isActive = selectedFilter == label;
     return GestureDetector(
       onTap: () => onFilterChanged(label),
       child: Container(
@@ -351,7 +338,7 @@ class HomeContent extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isActive ? Colors.white : Colors.black,
+            color: isActive ? Colors.white : Colors.black, 
             fontSize: 12,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
           ),

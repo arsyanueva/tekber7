@@ -1,3 +1,4 @@
+//Lailatul Fitaliqoh (5026231229)
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +31,7 @@ class _FieldCardState extends State<FieldCard> {
     try {
       final supabase = Supabase.instance.client;
 
-      // Ambil kolom rating dari reviews khusus untuk lapangan ini
+      // Ambil kolom rating dari reviews khusus untuk lapangan
       final response = await supabase
           .from('reviews')
           .select('rating')
@@ -57,7 +58,7 @@ class _FieldCardState extends State<FieldCard> {
     }
   }
 
-  // Helper Format Rupiah
+  // Format Rupiah
   String formatCurrency(num price) {
     return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(price);
   }
@@ -137,7 +138,7 @@ class _FieldCardState extends State<FieldCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Tampilan Rating Dinamis
+                    // Tampilan Rating
                     Row(
                       children: [
                         const Icon(Icons.star, size: 14, color: Colors.amber),

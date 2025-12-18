@@ -1,18 +1,21 @@
+//Lailatul Fitaliqoh (5026231229)
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/field_model.dart';
 import '../../widgets/field_card.dart';
 import '../../utils/app_colors.dart';
-import 'field_detail_screen.dart'; // Pastikan import ini ada!
+import 'field_detail_screen.dart'; 
 
 class AllFieldsScreen extends StatefulWidget {
   final String initialCity;
   final String initialFilter;
+  final String? initialSearch; 
 
   const AllFieldsScreen({
     super.key, 
     required this.initialCity, 
-    required this.initialFilter
+    required this.initialFilter,
+    this.initialSearch, 
   });
 
   @override
@@ -22,14 +25,17 @@ class AllFieldsScreen extends StatefulWidget {
 class _AllFieldsScreenState extends State<AllFieldsScreen> {
   List<FieldModel> fields = [];
   bool isLoading = true;
+  
   late String selectedCity;
   late String selectedFilter;
+  String? searchQuery; // Variabel untuk menyimpan kata kunci
 
   @override
   void initState() {
     super.initState();
     selectedCity = widget.initialCity;
     selectedFilter = widget.initialFilter;
+    searchQuery = widget.initialSearch; // Ambil data dari halaman sebelumnya
     fetchAllFields();
   }
 
@@ -38,12 +44,20 @@ class _AllFieldsScreenState extends State<AllFieldsScreen> {
     try {
       dynamic query = Supabase.instance.client.from('fields').select();
 
+      // 1. Filter Kota
       if (selectedCity == 'SBY') {
         query = query.ilike('address', '%Surabaya%');
       } else if (selectedCity == 'MLG') {
         query = query.ilike('address', '%Malang%');
       }
 
+      // 2. Filter Search
+      if (searchQuery != null && searchQuery!.isNotEmpty) {
+        // Cari nama lapangan yang mirip (case-insensitive)
+        query = query.ilike('name', '%$searchQuery%');
+      }
+
+      // 3. Sorting
       if (selectedFilter == 'Termurah') {
         query = query.order('price_per_hour', ascending: true);
       } else {
@@ -74,12 +88,21 @@ class _AllFieldsScreenState extends State<AllFieldsScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Semua Lapangan", style: TextStyle(color: Colors.white, fontSize: 16)),
+            // Judul berubah sesuai kondisi pencarian
+            Text(
+              searchQuery != null && searchQuery!.isNotEmpty 
+                  ? "\"$searchQuery\"" 
+                  : "Semua Lapangan", 
+              style: const TextStyle(color: Colors.white, fontSize: 16)
+            ),
             Row(
               children: [
                 const Icon(Icons.location_on, size: 12, color: AppColors.primaryYellow),
                 const SizedBox(width: 4),
-                Text(selectedCity == 'SBY' ? "Surabaya" : "Malang", style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text(
+                  selectedCity == 'SBY' ? "Surabaya" : "Malang", 
+                  style: const TextStyle(color: Colors.white70, fontSize: 12)
+                ),
               ],
             )
           ],
@@ -88,30 +111,37 @@ class _AllFieldsScreenState extends State<AllFieldsScreen> {
       body: isLoading 
         ? const Center(child: CircularProgressIndicator())
         : fields.isEmpty 
-            ? const Center(child: Text("Tidak ada lapangan ditemukan."))
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.search_off, size: 60, color: Colors.grey),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Tidak ada lapangan ditemukan${searchQuery != null ? " untuk '$searchQuery'" : ""}.", 
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.all(20),
                 itemCount: fields.length,
                 itemBuilder: (context, index) {
                   final field = fields[index];
-                  
-                  // --- [UPDATE DI SINI] ---
-                  // Bungkus Padding/FieldCard dengan GestureDetector
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FieldDetailScreen(
-                            fieldId: field.id, 
-                          ),
+                          builder: (context) => FieldDetailScreen(fieldId: field.id),
                         ),
                       );
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: SizedBox(
-                        width: double.infinity, 
+                        width: double.infinity,
                         child: FieldCard(field: field),
                       ),
                     ),
