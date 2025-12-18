@@ -17,6 +17,7 @@ class FieldDetailScreen extends StatefulWidget {
 
 class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTickerProviderStateMixin {
   bool isLoading = true;
+  bool isCurrentUserOwner = false;
   
   // Data Lapangan
   Map<String, dynamic>? fieldData;
@@ -53,7 +54,9 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
   Future<void> _fetchAllData() async {
     try {
       final supabase = Supabase.instance.client;
+      final currentUser = supabase.auth.currentUser; // Ambil user yang login
 
+      // 1. Ambil Data Lapangan
       final fieldResponse = await supabase
           .from('fields')
           .select()
@@ -72,6 +75,12 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
           ? rawFacilities.split(',').map((e) => e.trim()).toList() 
           : [];
 
+      bool ownerCheck = false;
+      if (currentUser != null && fData['owner_id'] != null) {
+        // Bandingkan ID User Login dengan Owner ID Lapangan
+        ownerCheck = currentUser.id == fData['owner_id'];
+      }
+
       final rList = List<Map<String, dynamic>>.from(reviewsResponse);
       double totalRating = 0;
       if (rList.isNotEmpty) {
@@ -86,6 +95,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
         setState(() {
           fieldData = fData;
           facilitiesList = fList;
+          isCurrentUserOwner = ownerCheck; 
           isLoading = false;
         });
       }
@@ -503,7 +513,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> with SingleTicker
     return SingleChildScrollView(
       child: ReviewListSection(
         fieldId: widget.fieldId,
-        isOwner: true, 
+        isOwner: isCurrentUserOwner, 
       ),
     );
   }
