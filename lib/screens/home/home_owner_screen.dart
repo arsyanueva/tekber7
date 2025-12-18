@@ -200,7 +200,7 @@ class _OwnerHomeContentState extends State<OwnerHomeContent> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                       Navigator.pushNamed(context, '/add-field');
+                      Navigator.pushNamed(context, '/add-field');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryYellow,
@@ -315,6 +315,13 @@ class _OwnerMyFieldsContentState extends State<OwnerMyFieldsContent> {
     fetchMyFields();
   }
 
+  // supaya bisa langsung muncul pas pindah tab
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fetchMyFields();
+  }
+
   Future<void> fetchMyFields() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
@@ -382,7 +389,7 @@ class _OwnerMyFieldsContentState extends State<OwnerMyFieldsContent> {
                 height: 50,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                     Navigator.pushNamed(context, '/add-field');
+                    Navigator.pushNamed(context, '/add-field');
                   },
                   icon: const Icon(Icons.add_circle, color: AppColors.darkBackground),
                   label: const Text("Tambahkan Lapangan", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -486,7 +493,7 @@ class _OwnerMyFieldsContentState extends State<OwnerMyFieldsContent> {
               child: TextButton(
                 onPressed: () {
                    // Navigate to Edit Field Screen if you implement it later
-                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fitur Edit akan segera hadir!")));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fitur Edit akan segera hadir!")));
                 },
                 child: const Text("Edit", style: TextStyle(color: Colors.blue)),
               ),

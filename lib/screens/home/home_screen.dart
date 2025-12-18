@@ -40,9 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
       dynamic query = Supabase.instance.client.from('fields').select();
 
       if (_selectedCity == 'SBY') {
-        query = query.ilike('address', '%Surabaya%');
+        query = query.or('address.ilike.%Surabaya%,address.ilike.%SURABAYA%');
       } else if (_selectedCity == 'MLG') {
-        query = query.ilike('address', '%Malang%');
+        query = query.or('address.ilike.%Malang%,address.ilike.%MALANG%');
+      } else { // Jika selectedCity == 'ALL'
+        // Tidak ada filter kota diterapkan
       }
 
       query = query.limit(5); // Limit 5 untuk tampilan home
@@ -220,7 +222,9 @@ class HomeContent extends StatelessWidget {
                         },
                         // -----------------------------
                         decoration: InputDecoration(
-                          hintText: 'Cari Lapangan di ${selectedCity == "SBY" ? "Surabaya" : "Malang"}',
+                          hintText: selectedCity == 'ALL'
+                            ? 'Cari Lapangan di Semua Kota'
+                            : 'Cari Lapangan di ${selectedCity == "SBY" ? "Surabaya" : "Malang"}',
                           hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
                           prefixIcon: const Icon(Icons.search, color: Colors.grey),
                           filled: true,
@@ -243,6 +247,7 @@ class HomeContent extends StatelessWidget {
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           onChanged: onCityChanged, 
                           items: const [
+                            DropdownMenuItem(value: 'ALL', child: Text("ALL")),
                             DropdownMenuItem(value: 'SBY', child: Text("SBY")),
                             DropdownMenuItem(value: 'MLG', child: Text("MLG")),
                           ],
