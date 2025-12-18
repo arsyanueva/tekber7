@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
 import 'package:tekber7/models/booking_model.dart';
-import 'booking_detail_screen.dart'; 
+import 'payment_confirmation_screen.dart';
 
 class BookingSummaryScreen extends StatefulWidget {
   final String fieldId;
@@ -222,7 +222,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BookingDetailScreen(
+                          builder: (context) => PaymentConfirmationScreen(
                             booking: _draftBooking,
                             fieldName: widget.fieldName, 
                             selectedMethod: _selectedPaymentMethod, 
