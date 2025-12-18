@@ -82,7 +82,85 @@ Sebelum memulai, pastikan telah menginstal:
 ## 📂 Struktur Folder
 
 Berikut adalah gambaran struktur direktori proyek **Field Master**:
-
+lib/
+├── config/                  # Konfigurasi aplikasi
+│   ├── theme.dart           # Tema aplikasi (warna, font global)
+│   └── constants.dart       # Konstanta (misal: API Keys, ukuran padding default)
+│
+├── models/                  # Representasi data (Database Schema)
+│   ├── booking_model.dart   # Model pemesanan
+│   ├── field_model.dart     # Model lapangan
+│   ├── review_model.dart    # Model ulasan/rating
+│   └── user_model.dart      # Model pengguna
+│
+├── providers/               # State Management (Provider)
+│   └── review_provider.dart # State untuk manajemen review
+│
+├── routes/                  # Navigasi
+│   └── app_routes.dart      # Daftar nama rute dan map navigasi
+│
+├── screens/                 # Halaman-halaman UI (Views)
+│   ├── auth/                # Fitur Autentikasi
+│   │   ├── login_email_screen.dart
+│   │   ├── login_method_screen.dart
+│   │   ├── register_email_screen.dart
+│   │   ├── role_selection_screen.dart
+│   │   └── verify_otp_screen.dart
+│   │
+│   ├── booking/             # Fitur Pemesanan
+│   │   ├── booking_cancel_success_screen.dart
+│   │   ├── booking_detail_screen.dart
+│   │   ├── booking_history_screen.dart
+│   │   ├── booking_summary_screen.dart
+│   │   ├── cancel_booking_screen.dart
+│   │   ├── confirm_cancel_screen.dart
+│   │   ├── confirm_reschedule_screen.dart
+│   │   ├── payment_gateway_screen.dart
+│   │   ├── payment_success_screen.dart
+│   │   ├── reschedule_booking_screen.dart
+│   │   └── reschedule_success_screen.dart
+│   │
+│   ├── home/                # Fitur Utama (Beranda & Pencarian)
+│   │   ├── add_field_screenhome_screen.dart
+│   │   ├── all_fields_screen.dart
+│   │   ├── change_profile_screen.dart
+│   │   ├── field_detail_screen.dart
+│   │   ├── home_owner_screen.dart
+│   │   ├── home_screen.dart
+│   │   └── profile_screen.dart
+│   │
+│   ├── password/               
+│   │   ├── change_password_screen.dart
+│   │   └── forget_password_screen.dart
+│   │
+│   ├── review/              # Fitur Ulasan
+│   │   ├── reply_review_screen.dart
+│   │   └── review_form_screen.dart
+│   │
+│   ├── profile/             # Fitur Profil User
+│   │   ├── profile_screen.dart
+│   │   └── edit_profile_screen.dart
+│   │
+│   └── welcome/             # Layar Pembuka
+│   │  └── welcome_screen.dart
+│   │
+│   └── temp_loading_screen.dart
+│   
+├── services/                # Logika Bisnis & API (Supabase)
+│   ├── auth_service.dart    # Login, Register, Logout ke Supabase
+│   ├── booking_service.dart # Insert/Update booking
+│   └── review_service.dart  # Submit & Fetch review
+│
+├── utils/                   # Fungsi bantuan (Helpers)
+│   ├── app_colors.dart      # Palet warna (Hex codes)
+│   └── refund_helper.dart      
+│
+├── widgets/                 # Komponen UI yang bisa dipakai ulang (Global)
+│   ├── field_card.dart      # Kartu tampilan lapangan
+│   ├── review_list_section.dart 
+│   └── star_rating_display.dart     # Ikon bintang rating
+│
+└── main.dart                # Titik masuk aplikasi (Entry Point)
 
 
 Anggota Kelompok:
