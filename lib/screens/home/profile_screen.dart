@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tekber7/screens/home/change_profile_screen.dart';
+// import 'package:tekber7/screens/home/change_profile_screen.dart'; // Import jika diperlukan
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -23,26 +23,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _getProfileData();
   }
 
-  // FUNGSI: Ambil data dari User Metadata Supabase
-  void _getProfileData() {
+  // --- [UPDATE] AMBIL DATA DARI TABEL 'users' (KOLOM 'name') ---
+  Future<void> _getProfileData() async {
     final user = Supabase.instance.client.auth.currentUser;
     
     if (user != null) {
+      // 1. Set data dasar dari Auth (Email/Phone)
       setState(() {
-        // Ambil nama dari metadata (jika ada), kalau tidak pakai bagian depan email
-        final metadata = user.userMetadata;
-        
-        // Cek apakah ada 'full_name' atau 'name' di metadata
-        name = metadata?['name'] ?? metadata?['full_name'] ?? 'User';
-        
-        // Jika nama masih kosong/default, pakai email
-        if (name == 'User' && user.email != null) {
-          name = user.email!.split('@')[0];
-        }
-
-        // Ambil Phone jika login pakai phone, atau Email jika pakai email
-        emailOrPhone = user.phone ?? user.email ?? '-';
+         emailOrPhone = user.email ?? user.phone ?? '-';
       });
+
+      try {
+        // 2. Query ke tabel public.users berdasarkan ID
+        final response = await Supabase.instance.client
+            .from('users')
+            .select('name') // Kita hanya butuh kolom 'name' (bisa tambah 'avatar_url' dll)
+            .eq('id', user.id)
+            .single(); // Ambil satu data saja
+
+        // 3. Update UI dengan nama dari database
+        if (mounted) {
+          setState(() {
+            name = response['name'] ?? 'User'; // Jika null, default 'User'
+          });
+        }
+      } catch (e) {
+        debugPrint("Gagal mengambil profil dari database: $e");
+        // Fallback: Jika gagal ambil dari DB, pakai email depan
+        if (mounted) {
+          setState(() {
+            name = user.email?.split('@')[0] ?? 'User';
+          });
+        }
+      }
     }
   }
 
@@ -79,8 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: CircleAvatar(
                       radius: 48,
                       // Jika nanti ada URL avatar, pakai NetworkImage
-                      backgroundImage: const AssetImage("assets/profile_dummy.png"),
-                      // backgroundColor: Colors.grey, // Opsi jika gambar gagal load
+                      backgroundImage: const AssetImage("assets/images/profile_dummy.png"),
                     ),
                   ),
                   Container(
@@ -90,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.edit, // Ganti icon kamera jadi edit
+                      Icons.edit, 
                       size: 16,
                       color: Colors.black,
                     ),
@@ -102,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // ================= NAME & PHONE (DARI DATABASE) =================
               Text(
-                name, // <-- Variabel Nama
+                name, // <-- Variabel Nama dari tabel 'users'
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -122,18 +134,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // ================= MENU =================
               _menuButton(
-              icon: Icons.person_outline,
-              title: "Ubah Profil",
-              onTap: () {
-                // --- TEMPEL KODENYA DI SINI ---
-                Navigator.pushNamed(context, '/change-profile').then((result) {
-                  // Jika kembali membawa data 'true' (berhasil update), refresh data
-                  if (result == true) {
-                    _getProfileData();
-                  }
-                });
-              },
-            ),
+                icon: Icons.person_outline,
+                title: "Ubah Profil",
+                onTap: () {
+                  Navigator.pushNamed(context, '/change-profile').then((result) {
+                    // Jika kembali membawa data 'true' (berhasil update), refresh data
+                    if (result == true) {
+                      _getProfileData();
+                    }
+                  });
+                },
+              ),
               _menuButton(
                 icon: Icons.lock_outline,
                 title: "Ganti Password",
