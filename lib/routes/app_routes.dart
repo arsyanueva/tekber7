@@ -64,7 +64,10 @@ class AppRoutes {
 
       bookingDetail: (context) {
         final args = ModalRoute.of(context)!.settings.arguments as BookingModel;
-        return BookingDetailScreen(booking: args, selectedMethod: 'Transfer');
+        return BookingDetailScreen(
+          booking: args,
+          selectedMethod: args.paymentMethod ?? 'Detail Transaksi', 
+        );
       },
 
       confirmReschedule: (context) {
