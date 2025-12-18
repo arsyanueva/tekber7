@@ -160,7 +160,7 @@ lib/
 │
 └── main.dart                # Titik masuk aplikasi (Entry Point)
 
-
+```
 Anggota Kelompok:
 1. Yusuf Acala S. S. K. - 5026231089
 2. Rian Chairul Ichsan - 5026231121
