@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tekber7/routes/app_routes.dart'; // Import AppRoutes
 
 class BookingCancelSuccessScreen extends StatelessWidget {
   const BookingCancelSuccessScreen({super.key});
@@ -6,75 +7,44 @@ class BookingCancelSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Background Putih Bersih
-      body: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Spacer(), // Dorong konten ke tengah
-            
-            // 1. IKON CENTANG BESAR
-            Container(
-              height: 100,
-              width: 100,
-              decoration: const BoxDecoration(
-                color: Color(0xFF1E1E1E), // Warna Hitam/Gelap
-                shape: BoxShape.circle,
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icon Centang Hitam sesuai Figma
+              const Icon(Icons.check_circle, size: 120, color: Color(0xFF1E1E1E)),
+              const SizedBox(height: 30),
+              const Text(
+                "Pesanan Berhasil\nDibatalkan", 
+                textAlign: TextAlign.center, 
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
               ),
-              child: const Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 60,
-              ),
-            ),
-            
-            const SizedBox(height: 30),
-            
-            // 2. TEKS JUDUL
-            const Text(
-              "Pesanan Berhasil\nDibatalkan",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            
-            const Spacer(), // Dorong tombol ke bawah
-
-            // 3. TOMBOL KEMBALI (KUNING)
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFC107), // Kuning
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 50),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFC700),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  elevation: 0,
-                ),
-                onPressed: () {
-                  // Kembali ke halaman Home (Hapus semua history navigasi biar gak bisa back)
-                  // Asumsi nama route home kamu '/home' atau gunakan AppRoutes.home nanti
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                child: const Text(
-                  "Kembali ke Halaman Utama",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                  // PERBAIKAN NAVIGASI: Menghapus semua stack dan kembali ke Home
+                  onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                    context, 
+                    AppRoutes.home, 
+                    (route) => false
+                  ),
+                  child: const Text(
+                    "Kembali ke Halaman Utama", 
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)
                   ),
                 ),
-              ),
-            ),
-            
-            const SizedBox(height: 20),
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

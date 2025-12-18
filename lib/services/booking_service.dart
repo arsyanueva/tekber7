@@ -87,6 +87,21 @@ class BookingService {
       return false;
     }
   }
+  Future<void> cancelBooking({
+    required String bookingId, 
+    required String reason, 
+    required double refundAmount
+  }) async {
+    try {
+      await _supabase.from('bookings').update({
+        'status': 'cancelled',
+        'cancellation_reason': reason,
+        'refund_amount': refundAmount,
+      }).eq('id', bookingId);
+    } catch (e) {
+      throw Exception("Gagal membatalkan pesanan: $e");
+    }
+  }
 
   // ============================================================
   // BAGIAN 3: PEMBAYARAN

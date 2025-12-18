@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/models/booking_model.dart';
 import 'package:tekber7/routes/app_routes.dart';
-import 'package:tekber7/utils/refund_helper.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final BookingModel booking;
@@ -21,7 +20,6 @@ class BookingDetailScreen extends StatefulWidget {
 }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
-  // WARNA GSM
   final Color _primaryDark = const Color(0xFF1E1E1E);   
   final Color _primaryYellow = const Color(0xFFFFC700); 
 
@@ -35,12 +33,30 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isActive = widget.booking.status == 'confirmed' || widget.booking.status == 'pending';
+    // --- LOGIKA DINAMIS STATUS ---
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final bookingDay = DateTime(
+      widget.booking.bookingDate.year, 
+      widget.booking.bookingDate.month, 
+      widget.booking.bookingDate.day
+    );
+
+    String displayStatus = widget.booking.status;
+    bool isActuallyPast = bookingDay.isBefore(today);
+
+    // Jika sudah lewat hari dan status masih confirmed, anggap COMPLETED
+    if (isActuallyPast && widget.booking.status == 'confirmed') {
+      displayStatus = 'completed';
+    }
+
+    // Tombol aktif hanya jika belum lewat tanggalnya DAN statusnya belum cancelled/completed
+    bool isActive = (widget.booking.status == 'confirmed' || widget.booking.status == 'pending') && !isActuallyPast;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5), 
       appBar: AppBar(
-        backgroundColor: _primaryDark, // Header Gelap
+        backgroundColor: _primaryDark,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -63,7 +79,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // INFO LAPANGAN
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -74,7 +89,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.fieldName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  Text(widget.booking.fieldName ?? widget.fieldName, 
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   const SizedBox(height: 5),
                   Text("Lapangan 2 (Rumput Sintetis)", style: TextStyle(color: Colors.grey[600], fontSize: 14)),
                   const Divider(height: 30),
@@ -87,7 +103,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // STATUS & HARGA
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -104,10 +119,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(widget.booking.status).withOpacity(0.1),
+                          color: _getStatusColor(displayStatus).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(widget.booking.status.toUpperCase(), style: TextStyle(color: _getStatusColor(widget.booking.status), fontWeight: FontWeight.bold)),
+                        child: Text(
+                          displayStatus.toUpperCase(), 
+                          style: TextStyle(color: _getStatusColor(displayStatus), fontWeight: FontWeight.bold)
+                        ),
                       ),
                     ],
                   ),
@@ -125,6 +143,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           ],
         ),
       ),
+      // Tombol hanya muncul jika pesanan masih aktif (belum lewat tanggalnya)
       bottomNavigationBar: isActive ? Container(
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Color(0xFFEEEEEE)))),
@@ -164,6 +183,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     if (status == 'confirmed') return Colors.green;
     if (status == 'pending') return Colors.orange;
     if (status == 'cancelled') return Colors.red;
+    if (status == 'completed') return Colors.blue;
     return Colors.blue;
   }
 }

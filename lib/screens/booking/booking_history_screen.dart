@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/utils/app_colors.dart';
 import 'package:tekber7/routes/app_routes.dart';
-import 'package:tekber7/screens/home/field_detail_screen.dart';
-import 'package:provider/provider.dart'; // <--- WAJIB ADA
-import 'package:tekber7/providers/review_provider.dart'; // <--- Sesuaikan path provider kamu
+import 'package:provider/provider.dart'; 
+import 'package:tekber7/providers/review_provider.dart'; 
 
-// Import Model & Service Kita
+// Import Model & Service
 import 'package:tekber7/models/booking_model.dart';
 import 'package:tekber7/services/booking_service.dart';
 
@@ -30,19 +29,33 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     _fetchBookingData();
   }
 
-  // --- PAKAI BOOKING SERVICE (BIAR RAPI) ---
   Future<void> _fetchBookingData() async {
     try {
-      // Panggil fungsi dari service yang udah kita buat
       final allBookings = await _bookingService.getUserBookings();
 
       List<BookingModel> tempUpcoming = [];
       List<BookingModel> tempHistory = [];
 
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
       for (var item in allBookings) {
-        if (item.status == 'pending' || item.status == 'confirmed') {
+        final bookingDay = DateTime(
+          item.bookingDate.year, 
+          item.bookingDate.month, 
+          item.bookingDate.day
+        );  
+
+        // Cek apakah tanggal booking sudah lewat dari hari ini
+        bool isPast = bookingDay.isBefore(today);
+
+        // --- PERBAIKAN LOGIKA DISINI ---
+        // 1. Masuk tab BERLANGSUNG jika: Status confirmed/pending DAN belum lewat hari
+        if ((item.status == 'pending' || item.status == 'confirmed') && !isPast) {
           tempUpcoming.add(item);
-        } else {
+        } 
+        // 2. Masuk tab RIWAYAT jika: Sudah lewat hari ATAU status memang cancelled/completed
+        else {
           tempHistory.add(item);
         }
       }
@@ -60,7 +73,6 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     }
   }
 
-  // Helper format tanggal
   String _formatDate(DateTime date) {
     return DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date);
   }
@@ -136,18 +148,25 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
   }
 
   Widget _buildBookingCard(BuildContext context, BookingModel item, bool isHistoryTab) {
+    // --- LOGIKA PENENTUAN STATUS TAMPILAN ---
+    String displayStatus = item.status.toUpperCase();
     Color statusColor = Colors.orange;
-    if (item.status == 'confirmed') statusColor = Colors.green;
-    if (item.status == 'completed') statusColor = Colors.blue;
-    if (item.status == 'cancelled') statusColor = Colors.red;
 
-    // --- [PERBAIKAN LOGIC NAMA] ---
-    // 1. Cek apakah ada nama asli dari database (item.fieldName).
-    // 2. Kalau NULL/KOSONG, pake "Lapangan Futsal" (Jangan pake ID biar rapi).
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final bookingDay = DateTime(item.bookingDate.year, item.bookingDate.month, item.bookingDate.day);
+
+    // Jika tanggal sudah lewat dan status masih 'confirmed', ubah jadi 'COMPLETED' di UI
+    if (bookingDay.isBefore(today) && item.status == 'confirmed') {
+      displayStatus = "COMPLETED";
+      statusColor = Colors.blue;
+    } else {
+      if (item.status == 'confirmed') statusColor = Colors.green;
+      if (item.status == 'completed') statusColor = Colors.blue;
+      if (item.status == 'cancelled') statusColor = Colors.red;
+    }
+
     String finalName = item.fieldName ?? "Lapangan Futsal"; 
-    
-    // Fallback kalau mau nampilin ID cuma buat debug (opsional)
-    // String finalName = item.fieldName ?? "Lapangan #${item.fieldId.substring(0, 4)}";
 
     return GestureDetector(
       onTap: () async {
@@ -156,12 +175,12 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
           AppRoutes.bookingDetail,
           arguments: item,
         );
-        _fetchBookingData();
+        _fetchBookingData(); 
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFC700), // Kuning
+          color: const Color(0xFFFFC700),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -173,7 +192,6 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
         ),
         child: Column(
           children: [
-            // HEADER KARTU (ITEM - ATAS)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: const BoxDecoration(
@@ -185,7 +203,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      finalName, // <--- SEKARANG PAKE NAMA YANG RAPI
+                      finalName,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -197,7 +215,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      item.status.toUpperCase(),
+                      displayStatus, // Pakai displayStatus agar dinamis
                       style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -205,7 +223,6 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
               ),
             ),
 
-            // BODY KARTU (KUNING - BAWAH)
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -219,12 +236,10 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                     child: const Icon(Icons.sports_soccer, size: 30),
                   ),
                   const SizedBox(width: 12),
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Nama Lapangan diulang atau Info tambahan
                         Text(finalName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         const SizedBox(height: 4),
                         Text(_formatDate(item.bookingDate), style: const TextStyle(fontSize: 12)),
@@ -233,10 +248,9 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                     ),
                   ),
 
-                  // TOMBOL AKSI
                   if (isHistoryTab)
                     ElevatedButton(
-                      onPressed: item.status == 'completed'
+                      onPressed: (item.status == 'completed' || (bookingDay.isBefore(today) && item.status == 'confirmed'))
                           ? () {
                               Navigator.pushNamed(
                                 context,
