@@ -308,7 +308,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                             _buildPaymentOption("Transfer BCA", "assets/images/bca.png"),
                             _buildPaymentOption("Transfer BRI", "assets/images/bri.png"),
                             _buildPaymentOption("Transfer Mandiri", "assets/images/mandiri.png"),
-                            _buildPaymentOption("Bank Jatim", "assets/images/bank_jatim.png"),
+                            _buildPaymentOption("Bank Jatim", "assets/images/jatim.png"),
                           ]),
                         const SizedBox(height: 10),
                         _buildGroup(title: "E-Wallet", icon: Icons.wallet, children: [
