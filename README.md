@@ -1,17 +1,13 @@
 # tekber7
 **Kelompok 7 - Teknologi Berkembang C**
-A new Flutter project.
 
-    Deskripsi proyek
-    Cara instalasi
-    Cara menjalankan
-    Struktur folder
 # Field Master
 
 **Field Master** adalah aplikasi mobile berbasis Flutter yang memudahkan pengguna untuk mencari, melihat detail, dan menyewa lapangan olahraga (seperti Lapangan Futsal, Badminton) secara online. Aplikasi ini terintegrasi dengan **Supabase** sebagai backend untuk autentikasi pengguna, manajemen database, dan penyimpanan data.
 
 ## Fitur Utama
 Field Master juga memiliki beberapa fitur utama, yaitu:
+
 **1. Sebagai Penyewa**
 * **Autentikasi Pengguna:** Login dan Register menggunakan Email & Password.
 * **Pencarian & Filter:** Cari lapangan berdasarkan nama, lokasi (Kota), dan urutkan berdasarkan harga atau fasilitas.
@@ -64,7 +60,7 @@ Sebelum memulai, pastikan telah menginstal:
     ```
 ---
 
-## 🚀 Cara Menjalankan
+## Cara Menjalankan
 
 1.  **Buka Emulator** atau sambungkan perangkat fisik via USB.
 2.  Pastikan perangkat terdeteksi:
@@ -82,6 +78,8 @@ Sebelum memulai, pastikan telah menginstal:
 ## 📂 Struktur Folder
 
 Berikut adalah gambaran struktur direktori proyek **Field Master**:
+
+```text
 lib/
 ├── config/                  # Konfigurasi aplikasi
 │   ├── theme.dart           # Tema aplikasi (warna, font global)
