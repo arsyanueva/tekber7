@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tekber7/services/auth_service.dart';
 import 'package:tekber7/utils/app_colors.dart';
 import 'package:tekber7/screens/home/profile_screen.dart';
+import 'package:tekber7/screens/home/field_detail_screen.dart';
 
 // --- MODEL SEDERHANA UNTUK BOOKING ---
 class OwnerBookingModel {
@@ -410,70 +411,88 @@ class _OwnerMyFieldsContentState extends State<OwnerMyFieldsContent> {
   }
 
   Widget _buildMyFieldCard(MyFieldModel field) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 10),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    field.imageUrl,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) => Container(width: 80, height: 80, color: Colors.grey[300], child: const Icon(Icons.image)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.primaryYellow, borderRadius: BorderRadius.circular(20)),
-                        child: const Text('Admin', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(field.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text(field.address, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          Text(' ${field.rating} (40)', style: const TextStyle(fontSize: 12)),
-                          const Spacer(),
-                          Text('${field.price}k', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          const Text('/jam', style: TextStyle(fontSize: 12)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+        // --- [NEW] Navigate to FieldDetailScreen ---
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FieldDetailScreen(
+              fieldId: field.id, 
+              // fieldId is passed here so FieldDetailScreen can detect ownership
             ),
           ),
-          const Divider(height: 1),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: () {},
-              child: const Text("Edit", style: TextStyle(color: Colors.blue)),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 10),
+          ],
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      field.imageUrl,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (ctx, err, stack) => Container(width: 80, height: 80, color: Colors.grey[300], child: const Icon(Icons.image)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(color: AppColors.primaryYellow, borderRadius: BorderRadius.circular(20)),
+                          child: const Text('Admin', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(field.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(field.address, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: Colors.amber, size: 16),
+                            Text(' ${field.rating} (40)', style: const TextStyle(fontSize: 12)),
+                            const Spacer(),
+                            Text('${field.price}k', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            const Text('/jam', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )
-        ],
+            const Divider(height: 1),
+            // Edit Button (Keep existing functionality or logic if needed)
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () {
+                   // Navigate to Edit Field Screen if you implement it later
+                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fitur Edit akan segera hadir!")));
+                },
+                child: const Text("Edit", style: TextStyle(color: Colors.blue)),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
