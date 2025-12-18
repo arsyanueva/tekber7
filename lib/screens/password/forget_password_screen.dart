@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 const Color kDarkColor = Color(0xFF221F2E); // Warna tombol gelap
 const Color kYellowColor = Color(0xFFFFC200); // Warna tombol kuning/oranye
 const Color kInputColor = Color(0xFFEAEAEA); // Warna background input field
-const Color kTextColor =  Colors.black87;
+const Color kTextColor = Colors.black87;
 
 enum ResetStep {
   input,
@@ -39,7 +39,18 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
   SupabaseClient get supabase => Supabase.instance.client;
 
   void next() => setState(() => step = ResetStep.values[step.index + 1]);
-  void back() => setState(() => step = ResetStep.values[step.index - 1]);
+  
+  // LOGIC TOMBOL BACK:
+  // - Jika di langkah pertama, tutup halaman (pop).
+  // - Jika di langkah selanjutnya, mundur satu langkah (step - 1).
+  void back() {
+    if (step == ResetStep.input) {
+      Navigator.pop(context);
+    } else {
+      setState(() => step = ResetStep.values[step.index - 1]);
+      error = null; // Bersihkan error saat mundur
+    }
+  }
 
   // --- 1. MENGIRIM KODE OTP ---
   Future<void> sendReset() async {
@@ -55,21 +66,18 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
 
     try {
       if (isEmail) {
-        // Kirim OTP ke Email
         await supabase.auth.signInWithOtp(
           email: contactCtrl.text.trim(),
-          shouldCreateUser: false, // Penting: False karena kita mau reset, bukan daftar baru
+          shouldCreateUser: false, 
         );
       } else {
-        // Kirim OTP ke SMS
         await supabase.auth.signInWithOtp(
           phone: contactCtrl.text.trim(),
           shouldCreateUser: false,
         );
       }
-      next(); // Pindah ke halaman input OTP
+      next(); 
     } on AuthException catch (e) {
-      // Menangkap error khusus Supabase (misal: user tidak ditemukan)
       setState(() => error = e.message);
     } catch (e) {
       setState(() => error = "Terjadi kesalahan koneksi");
@@ -98,14 +106,13 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
         type: isEmail ? OtpType.email : OtpType.sms,
       );
 
-      // Jika session berhasil dibuat, artinya login sukses
       if (response.session != null) {
-        next(); // Pindah ke halaman password baru
+        next(); 
       } else {
         throw "Verifikasi gagal";
       }
     } on AuthException catch (e) {
-      setState(() => error = e.message); // Biasanya "Token expired" atau "Invalid token"
+      setState(() => error = e.message); 
     } catch (e) {
       setState(() => error = e.toString());
     } finally {
@@ -136,12 +143,10 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
     });
 
     try {
-      // Karena langkah verifyOtp sudah membuat user 'Login', 
-      // kita bisa langsung pakai updateUser
       await supabase.auth.updateUser(
         UserAttributes(password: passCtrl.text),
       );
-      next(); // Pindah ke halaman sukses
+      next(); 
     } on AuthException catch (e) {
       setState(() => error = e.message);
     } catch (e) {
@@ -166,56 +171,69 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
       title = 'Perbarui Password';
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. HEADER (Tombol Back & Judul)
-              if (step != ResetStep.input && step != ResetStep.success)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: GestureDetector(
-                    onTap: back,
-                    child: const Icon(Icons.arrow_back, color: Colors.black),
-                  ),
+    // Handle tombol fisik Android (PopScope)
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        back(); // Panggil fungsi back custom kita
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        
+        // --- INI BAGIAN APPBAR YANG DISESUAIKAN ---
+        // Menggunakan AppBar standar seperti di LoginEmailScreen
+        appBar: step == ResetStep.success 
+            ? null 
+            : AppBar(
+                backgroundColor: Colors.white,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  onPressed: back, // Panggil logika back custom
                 ),
-
-              if (step != ResetStep.success)
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: kTextColor,
-                  ),
-                ),
-              
-              if (step != ResetStep.success)
-                const SizedBox(height: 24),
-
-              // 2. ERROR MESSAGE
-              if (error != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(10),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                      color: Colors.red[50],
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Text(error!, style: const TextStyle(color: Colors.red)),
-                ),
-
-              // 3. KONTEN BODY (Expanded agar Spacer bekerja)
-              Expanded(
-                child: loading
-                    ? const Center(child: CircularProgressIndicator(color: kDarkColor))
-                    : _getCurrentContent(), 
               ),
-            ],
+
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0), // Padding disamakan 24
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. JUDUL HALAMAN (Tetap di body, di bawah AppBar)
+                if (step != ResetStep.success)
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: kTextColor,
+                    ),
+                  ),
+                
+                if (step != ResetStep.success)
+                  const SizedBox(height: 30), // Spacing disamakan 30
+      
+                // 2. ERROR MESSAGE
+                if (error != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                        color: Colors.red[50],
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Text(error!, style: const TextStyle(color: Colors.red)),
+                  ),
+      
+                // 3. KONTEN BODY
+                Expanded(
+                  child: loading
+                      ? const Center(child: CircularProgressIndicator(color: kDarkColor))
+                      : _getCurrentContent(), 
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -247,7 +265,7 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
         TextField(
           controller: contactCtrl,
           keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.phone,
-          decoration: _inputDecoration(isEmail ? 'nama@email.com' : '+628...'),
+          decoration: _inputDecoration(isEmail ? 'cth: nama@email.com' : 'cth: +628...'),
           style: const TextStyle(color: Colors.black87),
         ),
         const SizedBox(height: 10),
@@ -261,6 +279,11 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
                 error = null;
               });
             },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(50, 30),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             child: Text(
               isEmail ? 'Gunakan Nomor HP' : 'Gunakan Email',
               style: const TextStyle(color: Colors.grey),
@@ -315,7 +338,7 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
         const SizedBox(height: 20),
         TextField(
           controller: otpCtrl,
-          keyboardType: TextInputType.number, // Supaya keyboard muncul angka
+          keyboardType: TextInputType.number,
           decoration: _inputDecoration('Masukkan Kode OTP'),
         ),
         const Spacer(),
@@ -391,7 +414,6 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
                 elevation: 0,
               ),
               onPressed: () {
-                // Saat tombol kembali ditekan, hapus semua history route
                 Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
               },
               child: const Text(
@@ -432,14 +454,18 @@ class _ResetPasswordFlowState extends State<ResetPasswordFlow> {
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      filled: true,
-      fillColor: kInputColor,
+      filled: true, // Tidak ada border luar
+      fillColor: kInputColor, // Warna abu-abu background input
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide.none, // Hilangkan border garis
       ),
       enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide.none,
       ),
