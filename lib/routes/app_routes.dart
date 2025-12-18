@@ -13,6 +13,11 @@ import 'package:tekber7/screens/auth/verify_otp_screen.dart';
 import 'package:tekber7/screens/home/home_owner_screen.dart';
 import 'package:tekber7/screens/home/add_field_screen.dart';
 
+// --- IMPORT FILE BARU KAMU ---
+import '../screens/booking/booking_detail_screen.dart';
+import '../screens/booking/confirm_reschedule_screen.dart';
+import '../screens/booking/reschedule_success_screen.dart';
+import '../models/booking_model.dart';
 
 class AppRoutes {
   // Definisi nama route
@@ -30,6 +35,11 @@ class AppRoutes {
   static const String homeOwner = '/home-owner';
   static const String addField = '/add-field';
 
+  // --- NAMA ROUTE BARU ---
+  static const String bookingDetail = '/booking-detail';
+  static const String confirmReschedule = '/confirm-reschedule';
+  static const String rescheduleSuccess = '/reschedule-success';
+
   // Map route ke Widget
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -42,16 +52,39 @@ class AppRoutes {
       verifyOtp: (context) => const VerifyOtpScreen(),
       homeOwner: (context) => const HomeOwnerScreen(),
       addField: (context) => const AddFieldScreen(),
+      
       // Route khusus untuk Add Review dengan Arguments
       addReview: (context) {
-        // 1. Ambil data args dan cast sebagai Map
         final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
-        // 2. Pass data ke Constructor ReviewFormScreen
         return ReviewFormScreen(
           bookingId: args['bookingId'],
           fieldId: args['fieldId'],
           fieldName: args['fieldName'],
+        );
+      },
+
+      // --- KONFIGURASI ROUTE BARU KAMU ---
+      bookingDetail: (context) {
+        final args = ModalRoute.of(context)!.settings.arguments as BookingModel;
+        return BookingDetailScreen(booking: args, selectedMethod: 'Transfer');
+      },
+
+      confirmReschedule: (context) {
+        final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+        return ConfirmRescheduleScreen(
+          oldBooking: args['oldBooking'],
+          newDate: args['newDate'],
+          newStartTime: args['newStartTime'],
+          newEndTime: args['newEndTime'],
+        );
+      },
+
+      rescheduleSuccess: (context) {
+        final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+        return RescheduleSuccessScreen(
+          newDate: args['newDate'],
+          newStartTime: args['newStartTime'],
+          newEndTime: args['newEndTime'],
         );
       },
 

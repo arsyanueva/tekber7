@@ -150,13 +150,13 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     // String finalName = item.fieldName ?? "Lapangan #${item.fieldId.substring(0, 4)}";
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.pushNamed(
           context,
-          MaterialPageRoute(
-            builder: (context) => FieldDetailScreen(fieldId: item.fieldId),
-          ),
+          AppRoutes.bookingDetail,
+          arguments: item,
         );
+        _fetchBookingData();
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
