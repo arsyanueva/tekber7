@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/material.dart'; // Buat debugPrint
+import 'package:flutter/material.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/booking_model.dart';
 
@@ -14,16 +14,12 @@ class BookingService {
     try {
       final data = booking.toJson();
       
-      // HAPUS ID DARI DATA YANG DIKIRIM
-      // Biar Supabase yang bikinin UUID otomatis yang valid
       data.remove('id'); 
-      data.remove('fields'); // Hapus data joinan kalo ada
-      data.remove('field_name'); // Hapus data helper
+      data.remove('fields'); 
+      data.remove('field_name'); 
 
-      // Pastikan statusnya udah 'confirmed'
       data['status'] = 'confirmed'; 
 
-      // Kirim ke database (Insert)
       await _supabase.from('bookings').insert(data);
       
     } catch (e) {
@@ -36,7 +32,6 @@ class BookingService {
   // BAGIAN 2: READ (AMBIL DATA)
   // ============================================================
 
-  // Ambil Detail Booking Spesifik
   Future<Map<String, dynamic>?> getBookingDetail(String bookingId) async {
     try {
       final response = await _supabase
@@ -51,22 +46,17 @@ class BookingService {
     }
   }
 
-  // Ambil List Booking User (History) dengan JOIN ke tabel Fields
-  // Return List<BookingModel> biar konsisten sama UI kamu yang pake Model
   Future<List<BookingModel>> getUserBookings() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return [];
       
-      // Kita pake .select('*, fields(*)') buat JOIN ke tabel fields
       final response = await _supabase
           .from('bookings')
           .select('*, fields(name, image_url, address)') 
           .eq('renter_id', userId)
           .order('booking_date', ascending: false); 
 
-      // Convert response ke List<BookingModel>
-      // Pastikan BookingModel.fromJson kamu sudah support parsing 'fields'['name']
       return (response as List).map((json) => BookingModel.fromJson(json)).toList();
     } catch (e) {
       debugPrint("Error Get Bookings: $e");
@@ -78,7 +68,6 @@ class BookingService {
   // BAGIAN 3: RESCHEDULE & AVAILABILITY
   // ============================================================
 
-  // Cek Slot Kosong
   Future<bool> isSlotAvailable(String fieldId, DateTime date, String startTime, String endTime) async {
     try {
       final response = await _supabase
@@ -87,9 +76,6 @@ class BookingService {
           .eq('field_id', fieldId)
           .eq('booking_date', date.toIso8601String().split('T')[0]) 
           .neq('status', 'cancelled'); 
-
-      // Logic sederhana: kalau ada booking di hari itu, return false (perlu diperketat logic jam-nya nanti)
-      // Tapi sementara ini cukup untuk cek tanggal
       return (response as List).isEmpty; 
     } catch (e) {
       debugPrint("Error Check Slot: $e");
@@ -97,7 +83,6 @@ class BookingService {
     }
   }
 
-  // Proses Reschedule
   Future<bool> rescheduleBooking({
     required String bookingId,
     required String fieldId,
@@ -106,19 +91,12 @@ class BookingService {
     required String newEndTime,
   }) async {
     try {
-      // 1. Cek slot baru kosong gak?
-      // Note: Logic isSlotAvailable di atas masih basic (cek per hari). 
-      // Kalau mau lebih canggih, logic jam harus ditambah.
-      // bool isAvailable = await isSlotAvailable(fieldId, newDate, newStartTime, newEndTime);
-      // if (!isAvailable) return false; 
-
-      // 2. Update data booking
       await _supabase.from('bookings').update({
         'booking_date': newDate.toIso8601String().split('T')[0],
         'start_time': newStartTime,
         'end_time': newEndTime,
         'updated_at': DateTime.now().toIso8601String(),
-        'status': 'confirmed', // atau 'pending' tergantung kebijakan
+        'status': 'confirmed',
       }).eq('id', bookingId);
 
       return true; 
@@ -133,7 +111,6 @@ class BookingService {
   // BAGIAN 4: PAYMENT & CANCEL
   // ============================================================
 
-  // Pembayaran Mock (Tanpa Upload - Pilihan "Saya Sudah Transfer")
   Future<void> confirmPaymentMock(String bookingId, String paymentMethod) async {
     try {
       String dbMethod = 'transfer';
@@ -153,7 +130,6 @@ class BookingService {
     }
   }
 
-  // Pembayaran Real (Dengan Upload Bukti)
   Future<void> submitPayment(String bookingId, File imageFile) async {
     try {
       final fileExt = imageFile.path.split('.').last;
@@ -175,7 +151,6 @@ class BookingService {
     }
   }
 
-  // Batalkan Pesanan
   Future<void> cancelBooking({
     required String bookingId, 
     required String reason, 
@@ -184,9 +159,6 @@ class BookingService {
     try {
       await _supabase.from('bookings').update({
         'status': 'cancelled',
-        // Pastikan kolom ini ada di DB kamu, kalau gak ada di-komen aja
-        // 'cancellation_reason': reason,
-        // 'refund_amount': refundAmount,
       }).eq('id', bookingId);
     } catch (e) {
       throw Exception("Gagal membatalkan pesanan: $e");

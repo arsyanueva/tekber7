@@ -82,7 +82,6 @@ class _RescheduleBookingScreenState extends State<RescheduleBookingScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        // PASTIKAN CLASS INI ADA (Cek Code 3)
         builder: (context) => ConfirmRescheduleScreen(
           oldBooking: booking!,
           newDate: selectedDate,
@@ -169,7 +168,7 @@ class _RescheduleBookingScreenState extends State<RescheduleBookingScreen> {
               children: [
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   Text("${selectedSlots.length} Jam dipilih", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(), // HARGA DIHILANGKAN
+                  const SizedBox(), 
                 ]),
                 const SizedBox(height: 15),
                 SizedBox(

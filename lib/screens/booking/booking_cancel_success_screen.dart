@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tekber7/routes/app_routes.dart'; // Import AppRoutes
+import 'package:tekber7/routes/app_routes.dart'; 
 
 class BookingCancelSuccessScreen extends StatelessWidget {
   const BookingCancelSuccessScreen({super.key});
@@ -14,7 +14,6 @@ class BookingCancelSuccessScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon Centang Hitam sesuai Figma
               const Icon(Icons.check_circle, size: 120, color: Color(0xFF1E1E1E)),
               const SizedBox(height: 30),
               const Text(
@@ -31,7 +30,6 @@ class BookingCancelSuccessScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  // PERBAIKAN NAVIGASI: Menghapus semua stack dan kembali ke Home
                   onPressed: () => Navigator.pushNamedAndRemoveUntil(
                     context, 
                     AppRoutes.home, 

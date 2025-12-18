@@ -4,8 +4,6 @@ import 'package:tekber7/utils/app_colors.dart';
 import 'package:tekber7/routes/app_routes.dart';
 import 'package:provider/provider.dart'; 
 import 'package:tekber7/providers/review_provider.dart'; 
-
-// Import Model & Service
 import 'package:tekber7/models/booking_model.dart';
 import 'package:tekber7/services/booking_service.dart';
 
@@ -19,8 +17,8 @@ class BookingHistoryScreen extends StatefulWidget {
 class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
   final BookingService _bookingService = BookingService();
   
-  List<BookingModel> upcomingList = []; // Status: pending, confirmed
-  List<BookingModel> historyList = [];  // Status: completed, cancelled
+  List<BookingModel> upcomingList = [];
+  List<BookingModel> historyList = [];  
   bool isLoading = true;
 
   @override
@@ -46,15 +44,11 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
           item.bookingDate.day
         );  
 
-        // Cek apakah tanggal booking sudah lewat dari hari ini
         bool isPast = bookingDay.isBefore(today);
 
-        // --- PERBAIKAN LOGIKA DISINI ---
-        // 1. Masuk tab BERLANGSUNG jika: Status confirmed/pending DAN belum lewat hari
         if ((item.status == 'pending' || item.status == 'confirmed') && !isPast) {
           tempUpcoming.add(item);
         } 
-        // 2. Masuk tab RIWAYAT jika: Sudah lewat hari ATAU status memang cancelled/completed
         else {
           tempHistory.add(item);
         }
@@ -148,7 +142,6 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
   }
 
   Widget _buildBookingCard(BuildContext context, BookingModel item, bool isHistoryTab) {
-    // --- LOGIKA PENENTUAN STATUS TAMPILAN ---
     String displayStatus = item.status.toUpperCase();
     Color statusColor = Colors.orange;
 
@@ -156,7 +149,6 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     final today = DateTime(now.year, now.month, now.day);
     final bookingDay = DateTime(item.bookingDate.year, item.bookingDate.month, item.bookingDate.day);
 
-    // Jika tanggal sudah lewat dan status masih 'confirmed', ubah jadi 'COMPLETED' di UI
     if (bookingDay.isBefore(today) && item.status == 'confirmed') {
       displayStatus = "COMPLETED";
       statusColor = Colors.blue;
@@ -215,7 +207,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      displayStatus, // Pakai displayStatus agar dinamis
+                      displayStatus, 
                       style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ),

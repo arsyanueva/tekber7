@@ -9,8 +9,6 @@ class BookingModel {
   final String status;
   final String? paymentMethod;
   final DateTime createdAt;
-  
-  // --- [BARU] KANTONG BUAT NAMA LAPANGAN ---
   final String? fieldName; 
 
   BookingModel({
@@ -24,11 +22,10 @@ class BookingModel {
     required this.status,
     this.paymentMethod,
     required this.createdAt,
-    this.fieldName, // Masukin sini
+    this.fieldName,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
-    // --- [LOGIC BARU] AMBIL NAMA DARI JOIN TABLE ---
     String? extractedFieldName;
     if (json['fields'] != null) {
       extractedFieldName = json['fields']['name'];
@@ -39,14 +36,12 @@ class BookingModel {
       fieldId: json['field_id'] ?? '',
       renterId: json['renter_id'] ?? '',
       bookingDate: DateTime.parse(json['booking_date']),
-      startTime: (json['start_time'] ?? '00:00').toString().substring(0, 5), // Ambil jam:menit aja
+      startTime: (json['start_time'] ?? '00:00').toString().substring(0, 5), 
       endTime: (json['end_time'] ?? '00:00').toString().substring(0, 5),
       totalPrice: json['total_price'] is int ? json['total_price'] : int.tryParse(json['total_price'].toString()) ?? 0,
       status: json['status'] ?? 'pending',
       paymentMethod: json['payment_method'],
       createdAt: DateTime.parse(json['created_at']),
-      
-      // Simpan nama lapangan yang udah diambil tadi
       fieldName: extractedFieldName, 
     );
   }
@@ -63,7 +58,6 @@ class BookingModel {
       'status': status,
       'payment_method': paymentMethod,
       'created_at': createdAt.toIso8601String(),
-      // fieldName gak perlu dikirim balik ke db bookings
     };
   }
 }

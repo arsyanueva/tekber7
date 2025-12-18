@@ -36,12 +36,9 @@ class _ConfirmRescheduleScreenState extends State<ConfirmRescheduleScreen> {
   Future<void> _handleConfirm() async {
     setState(() => _isLoading = true);
     try {
-      // --- [UPDATE] PANGGIL FUNGSI YANG BENAR ---
-      // Kita pake 'rescheduleBooking' bukan 'updateBookingSchedule'
-      // Dan kita kirim parameter sesuai format baru (Named Parameters)
       await _bookingService.rescheduleBooking(
         bookingId: widget.oldBooking.id,
-        fieldId: widget.oldBooking.fieldId, // Ambil fieldId dari data lama
+        fieldId: widget.oldBooking.fieldId, 
         newDate: widget.newDate,
         newStartTime: widget.newStartTime,
         newEndTime: widget.newEndTime,
