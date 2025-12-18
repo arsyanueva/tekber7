@@ -12,7 +12,7 @@ class BookingDetailScreen extends StatefulWidget {
   const BookingDetailScreen({
     super.key, 
     required this.booking,
-    this.fieldName = "Bhaskara Futsal Arena",
+    this.fieldName = "Bhaskara Futsal Arena", // Default name
     required this.selectedMethod,
   });
 
@@ -63,7 +63,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       account = "900-00-123123-4 (Mandiri)";
       color = Colors.indigo;
     } else if (method.contains("Jatim")) {
-      logoPath = "assets/images/jatim.png"; 
+      logoPath = "assets/images/jatim.png"; // Pastikan path & nama file bener
       account = "001-234-567 (Jatim)";
       color = Colors.red;
     } else if (method.contains("Dana")) {
@@ -102,9 +102,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     };
   }
 
+  String _formatDate(DateTime date) {
+    return DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String formattedDate = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(widget.booking.bookingDate);
+    final String formattedDate = _formatDate(widget.booking.bookingDate);
     final paymentInfo = _getPaymentInfo();
 
     const Color primaryBlack = Color(0xFF1E1E1E);
@@ -210,7 +214,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           const SizedBox(height: 10),
                           const Text('Penyewaan Lapangan', style: TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 20),
-                          _buildRow("Tanggal", _formatDate(widget.booking.bookingDate)),
+                          _buildRow("Tanggal", formattedDate),
                           _buildRow("Waktu", "${widget.booking.startTime} - ${widget.booking.endTime}"),
                           _buildRow("Lapangan", "2"),
                           const Divider(),
@@ -250,5 +254,4 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Widget _buildRow(String label, String value) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: const TextStyle(color: Colors.grey)), Text(value, style: const TextStyle(fontWeight: FontWeight.w500))]));
-  String _formatDate(DateTime date) => "${date.day}/${date.month}/${date.year}";
 }
