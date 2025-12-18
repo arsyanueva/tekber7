@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tekber7/models/booking_model.dart';
-import 'package:tekber7/services/booking_services.dart';
+import 'package:tekber7/services/booking_service.dart';
 import 'payment_success_screen.dart';
 
 class PaymentGatewayScreen extends StatefulWidget {
